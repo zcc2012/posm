@@ -786,3 +786,13 @@ body {
         box-shadow: none;
     }
 }
+
+/* Hide manual total inputs: only keep unit price fields for packaging, shipping and labor. */
+label[for="packagingTotalPrice"],
+label[for="shippingTotalPrice"],
+label[for="laborTotalPrice"],
+.manual-cost-input:has(#packagingTotalPrice),
+.manual-cost-input:has(#shippingTotalPrice),
+.manual-cost-input:has(#laborTotalPrice) {
+    display: none !important;
+}
