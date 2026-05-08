@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>判定标准管理 - 报价系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            transition: color 0.3s;
+        }
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .type-printing { background: #e3f2fd; color: #1976d2; }
+        .type-cutting { background: #f3e5f5; color: #7b1fa2; }
+        .type-die-cutting { background: #e8f5e8; color: #388e3c; }
+        .type-wastage { background: #fff3e0; color: #f57c00; }
+        .type-varnish { background: #fce4ec; color: #c2185b; }
+        .type-lamination { background: #e0f2f1; color: #00695c; }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .size-range {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .price-info {
+            font-size: 0.9rem;
+        }
+        .price-info .base-price {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .price-info .square-price {
+            color: #007bff;
+            font-size: 0.8rem;
+        }
+        .table-group-header {
+            border-top: 2px solid #dee2e6;
+        }
+        .table-group-header td:first-child {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-right: 1px solid #dee2e6;
+            font-weight: bold;
+        }
+        .table-group-header .type-badge {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .standards-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            .category-header {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>成本分析与报价系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" title="切换导航菜单">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers"><i class="fas fa-users me-1"></i>客户管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials"><i class="fas fa-boxes me-1"></i>材料库</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes"><i class="fas fa-cogs me-1"></i>工艺库</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/pricing_standards"><i class="fas fa-ruler me-1"></i>判定标准</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotation_new"><i class="fas fa-file-invoice me-1"></i>报价单</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-ruler me-3"></i>判定标准管理</h1>
+                    <p class="mb-0">按材料分类管理各工艺类型的判定标准和尺寸范围</p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-light me-2" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                        <i class="fas fa-plus me-1"></i>添加分类
+                    </button>
+                    <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#standardModal">
+                        <i class="fas fa-plus me-1"></i>添加标准
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-4">
+        <!-- 消息提示区域 -->
+        <div id="messageContainer" class="mt-3" style="display: none;">
+            <div class="alert alert-dismissible fade show" role="alert" id="messageAlert">
+                <span id="messageText"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+        
+        <!-- 标准表格展示区域 -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="10%">种类</th>
+                            <th width="15%">材料/工艺选择</th>
+                            <th width="17%">长宽判定</th>
+                            <th width="11%">基础价格</th>
+                            <th width="11%">数量范围</th>
+                            <th width="8%">损耗</th>
+                            <th width="14%">下单增加尺寸</th>
+                            <th width="14%">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standardsTableBody">
+                        <!-- 动态加载标准数据 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑分类模态框 -->
+    <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalTitle">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="categoryModalTitle">
+                        <i class="fas fa-plus me-2"></i>添加材料分类
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="categoryForm">
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">分类名称</label>
+                            <input type="text" class="form-control" id="categoryName" placeholder="如：纸类材料" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryDescription" class="form-label">分类描述</label>
+                            <textarea class="form-control" id="categoryDescription" rows="3" placeholder="描述该分类的适用范围和特点"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveCategory()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑标准模态框 -->
+    <div class="modal fade" id="standardModal" tabindex="-1" aria-labelledby="standardModalTitle">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="standardModalTitle">
+                        <i class="fas fa-plus me-2"></i>添加判定标准
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="standardForm">
+                        <!-- 第一行：种类选择 -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="categoryType" class="form-label">1. 种类</label>
+                                    <select class="form-select" id="categoryType" required onchange="onCategoryTypeChange()">
+                                        <option value="">请选择种类</option>
+                                        <option value="material">材料</option>
+                                        <option value="process">工艺</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="specificSelection" class="form-label">2. 具体选择</label>
+                                    <select class="form-select" id="specificSelection" required>
+                                        <option value="">请先选择种类</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 第二行：标准名称 -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="standardName" class="form-label">标准名称</label>
+                                    <input type="text" class="form-control" id="standardName" required placeholder="请输入标准名称">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 第三行：长宽判定 -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="form-label">3. 长宽判定</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="minLength" class="form-label">最小长度 (mm)</label>
+                                    <input type="number" class="form-control" id="minLength" min="0" step="0.1" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="maxLength" class="form-label">最大长度 (mm)</label>
+                                    <input type="number" class="form-control" id="maxLength" min="0" step="0.1" placeholder="无限制">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="minWidth" class="form-label">最小宽度 (mm)</label>
+                                    <input type="number" class="form-control" id="minWidth" min="0" step="0.1" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="maxWidth" class="form-label">最大宽度 (mm)</label>
+                                    <input type="number" class="form-control" id="maxWidth" min="0" step="0.1" placeholder="无限制">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 下单增加尺寸 (仅材料类型显示) -->
+                        <div class="row" id="orderSizeIncreaseSection" style="display: none;">
+                            <div class="col-md-12">
+                                <label class="form-label">下单增加尺寸 <small class="text-muted">(用于实际下单时的尺寸调整)</small></label>
+                            </div>
+                        </div>
+                        <div class="row" id="orderSizeIncreaseInputs" style="display: none;">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="orderLengthIncrease" class="form-label">长度增加 (mm)</label>
+                                    <input type="number" class="form-control" id="orderLengthIncrease" min="0" step="0.1" placeholder="0" value="0">
+                                    <div class="form-text">例如：报价1000mm，下单1020mm，则填写20</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="orderWidthIncrease" class="form-label">宽度增加 (mm)</label>
+                                    <input type="number" class="form-control" id="orderWidthIncrease" min="0" step="0.1" placeholder="0" value="0">
+                                    <div class="form-text">例如：报价1000mm，下单1020mm，则填写20</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 第四行：基础价格和平方价格 (工艺类型专用) -->
+                        <div class="row" id="priceSection">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="basePrice" class="form-label">4. 基础价格 (元)</label>
+                                    <input type="number" class="form-control" id="basePrice" min="0" step="0.01" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="squarePrice" class="form-label">平方价格 (元/㎡)</label>
+                                    <input type="number" class="form-control" id="squarePrice" min="0" step="0.01" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 第五行：数量范围 -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="minQuantity" class="form-label">5. 数量范围 - 起始</label>
+                                    <input type="number" class="form-control" id="minQuantity" min="0" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="maxQuantity" class="form-label">数量范围 - 结束</label>
+                                    <input type="number" class="form-control" id="maxQuantity" min="0" placeholder="无限制">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 损耗区间 (工艺类型专用) -->
+                        <div class="row" id="wastageSection">
+                            <div class="col-md-12">
+                                <label class="form-label">损耗设置 <small class="text-muted">(按数量区间设置不同损耗值)</small></label>
+                            </div>
+                        </div>
+                        <div class="row" id="wastageInputs">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="wastage0100" class="form-label">0-100件损耗</label>
+                                    <input type="number" class="form-control" id="wastage0100" min="0" step="1" placeholder="80" value="80">
+                                    <div class="form-text">小批量损耗值</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="wastage1003000" class="form-label">100-3000件损耗</label>
+                                    <input type="number" class="form-control" id="wastage1003000" min="0" step="1" placeholder="40" value="40">
+                                    <div class="form-text">中批量损耗值</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="wastage3000plus" class="form-label">3000+件损耗</label>
+                                    <input type="number" class="form-control" id="wastage3000plus" min="0" step="1" placeholder="20" value="20">
+                                    <div class="form-text">大批量损耗值</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="standardDescription" class="form-label">标准描述</label>
+                            <textarea class="form-control" id="standardDescription" rows="3" placeholder="描述该标准的适用条件和计算方式"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="isActive" checked>
+                                <label class="form-check-label" for="isActive">
+                                    启用该标准
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveStandard()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteStandardModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除标准 "<span id="deleteStandardName"></span>" 吗？</p>
+                    <p class="text-muted small">此操作不可撤销，请谨慎操作。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteStandard()">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let standards = [];
+        let categories = [];
+        let currentStandardId = null;
+        let isEditMode = false;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCategories();
+            loadStandards();
+            loadProcesses(); // 加载工艺数据
+        });
+        
+        // 存储工艺数据
+        let processes = [];
+        
+        // 加载工艺数据
+        function loadProcesses() {
+            fetch('/api/processes')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        processes = data.processes;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading processes:', error);
+                });
+        }
+        
+        // 种类选择变化处理
+        function onCategoryTypeChange() {
+            const categoryType = document.getElementById('categoryType').value;
+            const specificSelection = document.getElementById('specificSelection');
+            const orderSizeIncreaseSection = document.getElementById('orderSizeIncreaseSection');
+            const orderSizeIncreaseInputs = document.getElementById('orderSizeIncreaseInputs');
+            const priceSection = document.getElementById('priceSection');
+            const wastageSection = document.getElementById('wastageSection');
+            
+            // 清空具体选择
+            specificSelection.innerHTML = '<option value="">请选择</option>';
+            
+            if (categoryType === 'material') {
+                // 加载材料分类
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    specificSelection.appendChild(option);
+                });
+                // 显示材料类型相关字段：下单增加尺寸
+                orderSizeIncreaseSection.style.display = 'block';
+                orderSizeIncreaseInputs.style.display = 'block';
+                // 隐藏工艺类型相关字段：基础价格、平方价格、损耗
+                priceSection.style.display = 'none';
+                wastageSection.style.display = 'none';
+                // 清空工艺类型字段的值
+                document.getElementById('basePrice').value = '';
+                document.getElementById('squarePrice').value = '';
+                document.getElementById('wastage').value = '';
+            } else if (categoryType === 'process') {
+                // 加载工艺类型
+                const processTypes = [
+                    { value: 'printing', text: '印刷' },
+                    { value: 'cutting', text: '切割' },
+                    { value: 'die-cutting', text: '模切' },
+                    { value: 'varnish', text: '光油' },
+                    { value: 'lamination', text: '覆膜' },
+                    { value: 'hot-stamping', text: '烫金' },
+                    { value: 'embossing', text: '压痕' },
+                    { value: 'binding', text: '装订' },
+                    { value: 'folding', text: '折页' },
+                    { value: 'punching', text: '打孔' },
+                    { value: 'wastage', text: '损耗' }
+                ];
+                
+                processTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.value;
+                    option.textContent = type.text;
+                    specificSelection.appendChild(option);
+                });
+                // 显示工艺类型相关字段：基础价格、平方价格、损耗
+                priceSection.style.display = 'block';
+                wastageSection.style.display = 'block';
+                // 隐藏材料类型相关字段：下单增加尺寸
+                orderSizeIncreaseSection.style.display = 'none';
+                orderSizeIncreaseInputs.style.display = 'none';
+                // 清空材料类型字段的值
+                document.getElementById('orderLengthIncrease').value = 0;
+                document.getElementById('orderWidthIncrease').value = 0;
+            }
+        }
+
+        // 加载材料分类
+        async function loadCategories() {
+            try {
+                const response = await fetch('/api/material_categories');
+                const result = await response.json();
+                
+                if (response.ok) {
+                    categories = result || [];
+                    updateCategorySelect();
+                } else {
+                    console.error('加载分类失败:', result.error);
+                }
+            } catch (error) {
+                console.error('加载分类时出错:', error);
+            }
+        }
+
+        // 更新分类选择器
+        function updateCategorySelect() {
+            // 新的表单结构中不需要预先填充分类选择器
+            // 分类选择器会在onCategoryTypeChange函数中动态填充
+            console.log('分类数据已加载:', categories.length, '个分类');
+        }
+
+        // 加载所有标准
+        async function loadStandards() {
+            try {
+                const response = await fetch('/api/pricing_standards');
+                const result = await response.json();
+                
+                if (response.ok) {
+                    standards = result || [];
+                } else {
+                    console.error('加载标准失败:', result.error);
+                }
+            } catch (error) {
+                console.error('加载标准时出错:', error);
+            }
+            displayStandards();
+        }
+
+        // 显示标准（表格形式，按种类分组）
+        function displayStandards() {
+            const tbody = document.getElementById('standardsTableBody');
+            
+            if (standards.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>暂无判定标准<br><small class="text-muted">点击上方按钮添加新的判定标准</small></td></tr>';
+                return;
+            }
+            
+            // 按种类分组
+            const groupedStandards = {};
+            standards.forEach(standard => {
+                const typeText = getTypeText(standard.type);
+                if (!groupedStandards[typeText]) {
+                    groupedStandards[typeText] = [];
+                }
+                groupedStandards[typeText].push(standard);
+            });
+            
+            let html = '';
+            Object.keys(groupedStandards)
+                .sort((a, b) => getTypeSortIndex(groupedStandards[a][0].type) - getTypeSortIndex(groupedStandards[b][0].type) || a.localeCompare(b, 'zh-CN'))
+                .forEach(typeText => {
+                const typeStandards = [...groupedStandards[typeText]].sort(compareStandardSize);
+                const typeClass = getTypeClass(typeStandards[0].type);
+                
+                // 添加分组标题行
+                html += `
+                    <tr class="table-group-header">
+                        <td rowspan="${typeStandards.length + 1}" class="align-middle text-center">
+                            <span class="type-badge ${typeClass} fs-6">${typeText}</span>
+                        </td>
+                        <td colspan="7" class="bg-light fw-bold text-muted small">共 ${typeStandards.length} 条标准</td>
+                    </tr>
+                `;
+                
+                // 添加该分组下的所有标准
+                typeStandards.forEach(standard => {
+                    const categoryName = getCategoryName(standard.material_category_id);
+                    
+                    html += `
+                        <tr>
+                            <td>
+                                <div class="fw-bold">${categoryName}</div>
+                                <small class="text-muted">${standard.name}</small>
+                            </td>
+                            <td>
+                                <div class="size-range">
+                                    <div>长: ${standard.min_length || 0} - ${standard.max_length || '∞'} mm</div>
+                                    <div>宽: ${standard.min_width || 0} - ${standard.max_width || '∞'} mm</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="price-info">
+                                    <div class="base-price">¥${standard.base_price || 0}</div>
+                                    <div class="square-price">¥${standard.square_price || 0}/m²</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="size-range">
+                                    ${standard.min_quantity || 0} - ${standard.max_quantity || '∞'}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="size-range">
+                                    ${standard.wastage || 0}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="size-range">
+                                    <div>长: +${standard.order_length_increase || 0}mm</div>
+                                    <div>宽: +${standard.order_width_increase || 0}mm</div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editStandard(${standard.id})" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteStandard(${standard.id}, '${standard.name}')" title="删除">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        // 同一类别内按尺寸由小到大排列
+        function compareStandardSize(a, b) {
+            const sortFields = [
+                'min_length',
+                'min_width',
+                'max_length',
+                'max_width',
+                'min_quantity',
+                'max_quantity'
+            ];
+            
+            for (const field of sortFields) {
+                const diff = normalizeNumber(a[field]) - normalizeNumber(b[field]);
+                if (diff !== 0) return diff;
+            }
+            
+            return (a.name || '').localeCompare(b.name || '', 'zh-CN');
+        }
+
+        function normalizeNumber(value) {
+            const numberValue = Number(value);
+            return Number.isFinite(numberValue) ? numberValue : 0;
+        }
+
+        function getTypeSortIndex(type) {
+            const order = [
+                'material',
+                'printing',
+                'cutting',
+                'die-cutting',
+                'varnish',
+                'lamination',
+                'hot-stamping',
+                'embossing',
+                'binding',
+                'folding',
+                'punching',
+                'wastage'
+            ];
+            const index = order.indexOf(type);
+            return index === -1 ? order.length : index;
+        }
+
+        // 获取分类名称
+        function getCategoryName(categoryId) {
+            if (!categoryId) return '通用标准';
+            const category = categories.find(c => c.id === categoryId);
+            return category ? category.name : '未知分类';
+        }
+
+        // 获取工艺类型样式类
+        function getTypeClass(type) {
+            return `type-${type.replace('_', '-')}`;
+        }
+
+        // 获取工艺类型文本
+        function getTypeText(type) {
+            const typeMap = {
+                'printing': '印刷',
+                'cutting': '切割',
+                'die-cutting': '模切',
+                'varnish': '光油',
+                'lamination': '覆膜',
+                'hot-stamping': '烫金',
+                'embossing': '压痕',
+                'binding': '装订',
+                'folding': '折页',
+                'punching': '打孔',
+                'wastage': '损耗'
+            };
+            return typeMap[type] || type;
+        }
+
+        // 添加新标准
+        function addStandard() {
+            isEditMode = false;
+            currentStandardId = null;
+            document.getElementById('standardModalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>添加判定标准';
+            document.getElementById('standardForm').reset();
+            
+            // 重置种类选择
+            document.getElementById('categoryType').value = '';
+            document.getElementById('specificSelection').innerHTML = '<option value="">请先选择种类</option>';
+            
+            new bootstrap.Modal(document.getElementById('standardModal')).show();
+        }
+
+        // 为特定分类添加标准
+        function addStandardToCategory(categoryName) {
+            // 找到对应的分类ID
+            const category = categories.find(c => c.name === categoryName);
+            const categoryId = category ? category.id : null;
+            
+            // 打开添加标准模态框并预选分类
+            const modal = new bootstrap.Modal(document.getElementById('standardModal'));
+            document.getElementById('standardModalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>添加判定标准';
+            document.getElementById('standardForm').reset();
+            document.getElementById('categoryType').value = 'material';
+            onCategoryTypeChange();
+            setTimeout(() => {
+                document.getElementById('specificSelection').value = categoryId || '';
+            }, 100);
+            isEditMode = false;
+            currentStandardId = null;
+            modal.show();
+        }
+
+        // 保存分类
+        async function saveCategory() {
+            const name = document.getElementById('categoryName').value.trim();
+            const description = document.getElementById('categoryDescription').value.trim();
+            
+            if (!name) {
+                showMessage('请输入分类名称', 'danger');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/material_categories', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('分类添加成功', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
+                    loadCategories();
+                } else {
+                    showMessage(result.error || '添加分类失败', 'danger');
+                }
+            } catch (error) {
+                showMessage('网络错误，请重试', 'danger');
+            }
+        }
+
+        // 保存标准
+        async function saveStandard() {
+            const categoryType = document.getElementById('categoryType').value;
+            const specificSelection = document.getElementById('specificSelection').value;
+            
+            if (!categoryType || !specificSelection) {
+                showMessage('请选择种类和具体选择', 'danger');
+                return;
+            }
+            
+            // 根据种类类型确定数据结构
+            const existingStandard = isEditMode && currentStandardId ? standards.find(s => s.id === currentStandardId) : null;
+            let formData = {
+                name: document.getElementById('standardName').value.trim(),
+                priority: existingStandard ? (existingStandard.priority || 1) : 1,
+                min_length: parseFloat(document.getElementById('minLength').value) || 0,
+                max_length: parseFloat(document.getElementById('maxLength').value) || 999999,
+                min_width: parseFloat(document.getElementById('minWidth').value) || 0,
+                max_width: parseFloat(document.getElementById('maxWidth').value) || 999999,
+                min_quantity: parseInt(document.getElementById('minQuantity').value) || 0,
+                max_quantity: parseInt(document.getElementById('maxQuantity').value) || 999999,
+                description: document.getElementById('standardDescription').value.trim(),
+                is_active: document.getElementById('isActive').checked
+            };
+            
+            if (categoryType === 'material') {
+                // 材料类型：只保留数量范围和下单增加尺寸
+                formData.type = 'material';
+                formData.material_category_id = parseInt(specificSelection);
+                formData.base_price = 0;
+                formData.square_price = 0;
+                formData.wastage = 0;
+                formData.order_length_increase = parseFloat(document.getElementById('orderLengthIncrease').value) || 0;
+                formData.order_width_increase = parseFloat(document.getElementById('orderWidthIncrease').value) || 0;
+            } else if (categoryType === 'process') {
+                // 工艺类型：只保留基础价格、平方价格、3个损耗区间和数量范围
+                formData.type = specificSelection;
+                formData.material_category_id = null;
+                formData.base_price = parseFloat(document.getElementById('basePrice').value) || 0;
+                formData.square_price = parseFloat(document.getElementById('squarePrice').value) || 0;
+                formData.wastage_0_100 = parseInt(document.getElementById('wastage0100').value) || 80;
+                formData.wastage_100_3000 = parseInt(document.getElementById('wastage1003000').value) || 40;
+                formData.wastage_3000_plus = parseInt(document.getElementById('wastage3000plus').value) || 20;
+                formData.order_length_increase = 0;
+                formData.order_width_increase = 0;
+            }
+            
+            if (!formData.name) {
+                showMessage('请填写标准名称', 'danger');
+                return;
+            }
+            
+            try {
+                let response;
+                if (isEditMode && currentStandardId) {
+                    response = await fetch(`/api/pricing_standards/${currentStandardId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                } else {
+                    response = await fetch('/api/pricing_standards', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                }
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(isEditMode ? '标准更新成功' : '标准添加成功', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('standardModal')).hide();
+                    loadStandards();
+                } else {
+                    showMessage(result.error || '保存标准失败', 'danger');
+                }
+            } catch (error) {
+                showMessage('网络错误，请重试', 'danger');
+            }
+        }
+
+        // 编辑标准
+        function editStandard(standardId) {
+            const standard = standards.find(s => s.id === standardId);
+            if (!standard) return;
+            
+            // 根据标准类型设置种类选择
+            if (standard.type === 'material') {
+                // 材料类型
+                document.getElementById('categoryType').value = 'material';
+                onCategoryTypeChange(); // 触发选项更新
+                setTimeout(() => {
+                    document.getElementById('specificSelection').value = standard.material_category_id;
+                }, 100);
+            } else {
+                // 工艺类型
+                document.getElementById('categoryType').value = 'process';
+                onCategoryTypeChange(); // 触发选项更新
+                setTimeout(() => {
+                    document.getElementById('specificSelection').value = standard.type;
+                }, 100);
+            }
+            
+            // 填充表单
+            document.getElementById('standardName').value = standard.name;
+            document.getElementById('minLength').value = standard.min_length;
+            document.getElementById('maxLength').value = standard.max_length === 999999 ? '' : standard.max_length;
+            document.getElementById('minWidth').value = standard.min_width;
+            document.getElementById('maxWidth').value = standard.max_width === 999999 ? '' : standard.max_width;
+            document.getElementById('minQuantity').value = standard.min_quantity;
+            document.getElementById('maxQuantity').value = standard.max_quantity === 999999 ? '' : standard.max_quantity;
+            document.getElementById('basePrice').value = standard.base_price;
+            document.getElementById('squarePrice').value = standard.square_price;
+            document.getElementById('wastage0100').value = standard.wastage_0_100 || 80;
+            document.getElementById('wastage1003000').value = standard.wastage_100_3000 || 40;
+            document.getElementById('wastage3000plus').value = standard.wastage_3000_plus || 20;
+            document.getElementById('orderLengthIncrease').value = standard.order_length_increase || 0;
+            document.getElementById('orderWidthIncrease').value = standard.order_width_increase || 0;
+            document.getElementById('standardDescription').value = standard.description || '';
+            document.getElementById('isActive').checked = standard.is_active;
+            
+            // 设置模态框标题和状态
+            document.getElementById('standardModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑判定标准';
+            isEditMode = true;
+            currentStandardId = standardId;
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('standardModal'));
+            modal.show();
+        }
+
+        // 删除标准
+        function deleteStandard(standardId, standardName) {
+            currentStandardId = standardId;
+            document.getElementById('deleteStandardName').textContent = standardName;
+            const modal = new bootstrap.Modal(document.getElementById('deleteStandardModal'));
+            modal.show();
+        }
+
+        // 确认删除标准
+        async function confirmDeleteStandard() {
+            try {
+                const response = await fetch(`/api/pricing_standards/${currentStandardId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('标准删除成功', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('deleteStandardModal')).hide();
+                    loadStandards();
+                } else {
+                    showMessage(result.error || '删除标准失败', 'danger');
+                }
+            } catch (error) {
+                showMessage('网络错误，请重试', 'danger');
+            }
+        }
+
+        // 显示消息
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const alert = document.getElementById('messageAlert');
+            const text = document.getElementById('messageText');
+            
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            text.textContent = message;
+            container.style.display = 'block';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                container.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

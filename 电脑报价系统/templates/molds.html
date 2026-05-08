@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模具库管理 - 报价单管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .btn-action {
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        .modal-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            padding: 40px 0;
+        }
+        .price-display {
+            font-weight: bold;
+            color: #9b59b6;
+        }
+        .category-badge {
+            background: #9b59b6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .mold-status {
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>报价单管理系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers">
+                            <i class="fas fa-users me-1"></i>客户管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials">
+                            <i class="fas fa-boxes me-1"></i>材料库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes">
+                            <i class="fas fa-cogs me-1"></i>工艺库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotations">
+                            <i class="fas fa-file-invoice-dollar me-1"></i>报价单
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-cube me-3"></i>模具库管理</h1>
+                    <p class="mb-0">管理报价单中的模具信息，包括开模费用、模具维护、使用次数等</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="category-badge">03 模具</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container my-4">
+        <!-- 操作按钮 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <button class="btn btn-purple" style="background-color: #9b59b6; border-color: #9b59b6; color: white;" data-bs-toggle="modal" data-bs-target="#moldModal" onclick="openAddModal()">
+                    <i class="fas fa-plus me-2"></i>添加模具
+                </button>
+                <button class="btn btn-outline-secondary ms-2" onclick="loadMolds()">
+                    <i class="fas fa-sync-alt me-1"></i>刷新
+                </button>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索模具名称或类型...">
+                    <button class="btn btn-outline-secondary" type="button" onclick="searchMolds()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模具列表 -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>模具名称</th>
+                            <th>模具类型</th>
+                            <th>规格尺寸</th>
+                            <th>开模费用</th>
+                            <th>使用次数</th>
+                            <th>状态</th>
+                            <th>供应商</th>
+                            <th>制作周期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="moldTableBody">
+                        <tr>
+                            <td colspan="10" class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>
+                                正在加载模具数据...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 空状态提示 -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-cube fa-5x text-muted mb-3"></i>
+            <h4 class="text-muted">暂无模具数据</h4>
+            <p class="text-muted">点击上方"添加模具"按钮开始添加模具信息</p>
+        </div>
+    </div>
+
+    <!-- 模具信息模态框 -->
+    <div class="modal fade" id="moldModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-cube me-2"></i>添加模具
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="moldForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="moldName" class="form-label">模具名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="moldName" required placeholder="如：吸塑模具、注塑模具等">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="moldType" class="form-label">模具类型</label>
+                                <select class="form-select" id="moldType">
+                                    <option value="">请选择模具类型</option>
+                                    <option value="吸塑模具">吸塑模具</option>
+                                    <option value="注塑模具">注塑模具</option>
+                                    <option value="压铸模具">压铸模具</option>
+                                    <option value="冲压模具">冲压模具</option>
+                                    <option value="弯曲模具">弯曲模具</option>
+                                    <option value="切割模具">切割模具</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="moldLength" class="form-label">长度 (mm)</label>
+                                <input type="number" class="form-control" id="moldLength" step="1" min="0" placeholder="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="moldWidth" class="form-label">宽度 (mm)</label>
+                                <input type="number" class="form-control" id="moldWidth" step="1" min="0" placeholder="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="moldHeight" class="form-label">高度 (mm)</label>
+                                <input type="number" class="form-control" id="moldHeight" step="1" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="moldCost" class="form-label">开模费用 (元)</label>
+                                <input type="number" class="form-control" id="moldCost" step="0.01" min="0" placeholder="0.00">
+                                <div class="form-text">一次性开模费用</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="usageCount" class="form-label">预计使用次数</label>
+                                <input type="number" class="form-control" id="usageCount" step="1" min="0" placeholder="0">
+                                <div class="form-text">模具预计可使用次数</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="moldStatus" class="form-label">模具状态</label>
+                                <select class="form-select" id="moldStatus">
+                                    <option value="设计中">设计中</option>
+                                    <option value="制作中">制作中</option>
+                                    <option value="可用">可用</option>
+                                    <option value="维修中">维修中</option>
+                                    <option value="报废">报废</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="moldSupplier" class="form-label">模具供应商</label>
+                                <input type="text" class="form-control" id="moldSupplier" placeholder="供应商名称">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="productionDays" class="form-label">制作周期 (天)</label>
+                                <input type="number" class="form-control" id="productionDays" step="1" min="0" placeholder="7">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="moldMaterial" class="form-label">模具材质</label>
+                                <select class="form-select" id="moldMaterial">
+                                    <option value="">请选择材质</option>
+                                    <option value="铝合金">铝合金</option>
+                                    <option value="钢材">钢材</option>
+                                    <option value="树脂">树脂</option>
+                                    <option value="木材">木材</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="maintenanceCost" class="form-label">维护费用 (元/次)</label>
+                                <input type="number" class="form-control" id="maintenanceCost" step="0.01" min="0" placeholder="0.00">
+                                <div class="form-text">每次维护保养费用</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lifespan" class="form-label">使用寿命 (月)</label>
+                                <input type="number" class="form-control" id="lifespan" step="1" min="0" placeholder="12">
+                                <div class="form-text">模具预计使用寿命</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="moldDescription" class="form-label">备注说明</label>
+                            <textarea class="form-control" id="moldDescription" rows="3" placeholder="可填写模具的详细描述、技术参数、使用注意事项等信息"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn" style="background-color: #9b59b6; border-color: #9b59b6; color: white;" onclick="saveMold()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteMoldModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除模具 "<span id="deleteMoldName"></span>" 吗？</p>
+                    <p class="text-muted small">此操作不可撤销，请谨慎操作。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteMold()">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let molds = [];
+        let currentMoldId = null;
+        let isEditMode = false;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMolds();
+        });
+
+        // 加载模具数据
+        function loadMolds() {
+            fetch('/api/molds')
+            .then(response => response.json())
+            .then(data => {
+                molds = data;
+                displayMolds(data);
+            })
+            .catch(error => {
+                console.error('Error loading molds:', error);
+                showAlert('加载模具数据失败', 'danger');
+            });
+        }
+
+        // 显示模具列表
+        function displayMolds(moldsData) {
+            const tbody = document.getElementById('moldTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (moldsData.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = moldsData.map(mold => `
+                <tr>
+                    <td>${mold.id}</td>
+                    <td><strong>${mold.name}</strong></td>
+                    <td><span class="badge bg-secondary">${mold.type || '-'}</span></td>
+                    <td>${formatSize(mold.length, mold.width, mold.height)}</td>
+                    <td class="price-display">¥${(mold.cost || 0).toFixed(2)}</td>
+                    <td>${mold.usage_count || 0}次</td>
+                    <td><span class="badge ${getStatusClass(mold.status)} mold-status">${mold.status || '未知'}</span></td>
+                    <td>${mold.supplier || '-'}</td>
+                    <td>${mold.production_days || '-'}天</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary btn-action" onclick="editMold(${mold.id})" title="编辑">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteMold(${mold.id}, '${mold.name}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 格式化尺寸显示
+        function formatSize(length, width, height) {
+            const dimensions = [];
+            if (length) dimensions.push(`L${length}`);
+            if (width) dimensions.push(`W${width}`);
+            if (height) dimensions.push(`H${height}`);
+            return dimensions.length > 0 ? dimensions.join('×') + 'mm' : '-';
+        }
+
+        // 获取状态样式
+        function getStatusClass(status) {
+            switch(status) {
+                case '可用': return 'bg-success';
+                case '设计中': return 'bg-info';
+                case '制作中': return 'bg-warning';
+                case '维修中': return 'bg-warning';
+                case '报废': return 'bg-danger';
+                default: return 'bg-secondary';
+            }
+        }
+
+        // 搜索模具
+        function searchMolds() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredMolds = molds.filter(mold => 
+                mold.name.toLowerCase().includes(searchTerm) ||
+                (mold.type && mold.type.toLowerCase().includes(searchTerm))
+            );
+            displayMolds(filteredMolds);
+        }
+
+        // 打开添加模态框
+        function openAddModal() {
+            isEditMode = false;
+            currentMoldId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>添加模具';
+            document.getElementById('moldForm').reset();
+            document.getElementById('moldStatus').value = '设计中';
+        }
+
+        // 编辑模具
+        function editMold(id) {
+            const mold = molds.find(m => m.id === id);
+            if (!mold) return;
+            
+            isEditMode = true;
+            currentMoldId = id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑模具';
+            
+            // 填充表单数据
+            document.getElementById('moldName').value = mold.name || '';
+            document.getElementById('moldType').value = mold.type || '';
+            document.getElementById('moldLength').value = mold.length || '';
+            document.getElementById('moldWidth').value = mold.width || '';
+            document.getElementById('moldHeight').value = mold.height || '';
+            document.getElementById('moldCost').value = mold.cost || '';
+            document.getElementById('usageCount').value = mold.usage_count || '';
+            document.getElementById('moldStatus').value = mold.status || '设计中';
+            document.getElementById('moldSupplier').value = mold.supplier || '';
+            document.getElementById('productionDays').value = mold.production_days || '';
+            document.getElementById('moldMaterial').value = mold.material || '';
+            document.getElementById('maintenanceCost').value = mold.maintenance_cost || '';
+            document.getElementById('lifespan').value = mold.lifespan || '';
+            document.getElementById('moldDescription').value = mold.description || '';
+            
+            new bootstrap.Modal(document.getElementById('moldModal')).show();
+        }
+
+        // 保存模具
+        function saveMold() {
+            const form = document.getElementById('moldForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const moldData = {
+                name: document.getElementById('moldName').value,
+                type: document.getElementById('moldType').value,
+                length: parseInt(document.getElementById('moldLength').value) || 0,
+                width: parseInt(document.getElementById('moldWidth').value) || 0,
+                height: parseInt(document.getElementById('moldHeight').value) || 0,
+                cost: parseFloat(document.getElementById('moldCost').value) || 0,
+                usage_count: parseInt(document.getElementById('usageCount').value) || 0,
+                status: document.getElementById('moldStatus').value,
+                supplier: document.getElementById('moldSupplier').value,
+                production_days: parseInt(document.getElementById('productionDays').value) || 0,
+                material: document.getElementById('moldMaterial').value,
+                maintenance_cost: parseFloat(document.getElementById('maintenanceCost').value) || 0,
+                lifespan: parseInt(document.getElementById('lifespan').value) || 0,
+                description: document.getElementById('moldDescription').value,
+                category: '03'
+            };
+            
+            const url = isEditMode ? `/api/molds/${currentMoldId}` : '/api/molds';
+            const method = isEditMode ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(moldData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('moldModal')).hide();
+                    loadMolds();
+                    showAlert(isEditMode ? '模具更新成功' : '模具添加成功', 'success');
+                } else {
+                    showAlert('操作失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('操作失败，请重试', 'danger');
+            });
+        }
+
+        // 删除模具
+        function deleteMold(id, name) {
+            currentMoldId = id;
+            document.getElementById('deleteMoldName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deleteMoldModal')).show();
+        }
+
+        // 确认删除模具
+        function confirmDeleteMold() {
+            fetch(`/api/molds/${currentMoldId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('deleteMoldModal')).hide();
+                    loadMolds();
+                    showAlert('模具删除成功', 'success');
+                } else {
+                    showAlert('删除失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('删除失败，请重试', 'danger');
+            });
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        // 搜索框回车事件
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchMolds();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>印刷标准管理 - 管理员工具</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+        }
+        .status-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .status-locked {
+            border-left: 4px solid #dc3545;
+        }
+        .status-unlocked {
+            border-left: 4px solid #28a745;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 印刷标准管理工具</h1>
+            <p>管理印刷标准判定逻辑的锁定状态和访问权限</p>
+        </div>
+
+        <!-- 当前状态显示 -->
+        <div id="statusCard" class="status-card status-locked">
+            <h3>📊 当前状态</h3>
+            <p><strong>锁定状态:</strong> <span id="lockStatus" style="color: #dc3545;">🔒 已锁定</span></p>
+            <p><strong>管理员密钥:</strong> <span id="currentKey">ADMIN_APPROVE_2024</span></p>
+            <p><strong>最后修改:</strong> <span id="lastModified">2024-01-01</span></p>
+            <p><strong>修改者:</strong> <span id="modifiedBy">System Administrator</span></p>
+        </div>
+
+        <!-- 操作区域 -->
+        <div class="form-group">
+            <label for="adminPassword">管理员密码验证:</label>
+            <input type="password" id="adminPassword" class="form-control" placeholder="请输入管理员密码">
+        </div>
+
+        <div class="form-group">
+            <button class="btn btn-warning" onclick="toggleLock()" title="切换印刷标准的锁定状态">🔓 切换锁定状态</button>
+                <button class="btn btn-primary" onclick="changeKey()" title="修改管理员访问密钥">🔑 修改密钥</button>
+                <button class="btn btn-success" onclick="testAccess()" title="测试当前密钥的访问权限">🧪 测试访问</button>
+                <button class="btn btn-danger" onclick="emergencyUnlock()" title="紧急解锁印刷标准（谨慎使用）">🚨 紧急解锁</button>
+        </div>
+
+        <!-- 新密钥设置 -->
+        <div class="form-group">
+            <label for="newKey">新密钥设置:</label>
+            <input type="text" id="newKey" class="form-control" placeholder="输入新的管理员密钥">
+        </div>
+
+        <!-- 操作日志 -->
+        <div id="logArea">
+            <h3>📝 操作日志</h3>
+            <div id="operationLog" class="code-block">
+                [2024-01-01 00:00:00] 系统初始化 - 印刷标准锁定功能启用
+            </div>
+        </div>
+
+        <!-- 帮助信息 -->
+        <div class="alert alert-warning">
+            <h4>⚠️ 重要说明</h4>
+            <ul>
+                <li><strong>锁定状态:</strong> 当印刷标准被锁定时，任何修改都需要管理员密钥验证</li>
+                <li><strong>密钥管理:</strong> 请妥善保管管理员密钥，避免泄露给非授权人员</li>
+                <li><strong>紧急解锁:</strong> 仅在紧急情况下使用，会记录详细的操作日志</li>
+                <li><strong>安全建议:</strong> 定期更换管理员密钥，确保系统安全</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 管理员密码（实际应用中应该从服务器验证）
+        const ADMIN_PASSWORD = 'admin123';
+        
+        // 当前印刷标准锁定配置
+        let printingStandardsLock = {
+            isLocked: true,
+            adminKey: 'ADMIN_APPROVE_2024',
+            lastModified: '2024-01-01',
+            modifiedBy: 'System Administrator'
+        };
+
+        // 操作日志
+        let operationLog = [];
+
+        // 验证管理员密码
+        function validateAdminPassword() {
+            const password = document.getElementById('adminPassword').value;
+            if (password !== ADMIN_PASSWORD) {
+                alert('管理员密码错误！');
+                return false;
+            }
+            return true;
+        }
+
+        // 添加操作日志
+        function addLog(message) {
+            const timestamp = new Date().toLocaleString('zh-CN');
+            const logEntry = `[${timestamp}] ${message}`;
+            operationLog.push(logEntry);
+            
+            const logElement = document.getElementById('operationLog');
+            logElement.innerHTML = operationLog.join('\n');
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // 更新状态显示
+        function updateStatusDisplay() {
+            const statusCard = document.getElementById('statusCard');
+            const lockStatus = document.getElementById('lockStatus');
+            const currentKey = document.getElementById('currentKey');
+            const lastModified = document.getElementById('lastModified');
+            const modifiedBy = document.getElementById('modifiedBy');
+
+            if (printingStandardsLock.isLocked) {
+                statusCard.className = 'status-card status-locked';
+                lockStatus.innerHTML = '🔒 已锁定';
+                lockStatus.style.color = '#dc3545';
+            } else {
+                statusCard.className = 'status-card status-unlocked';
+                lockStatus.innerHTML = '🔓 已解锁';
+                lockStatus.style.color = '#28a745';
+            }
+
+            currentKey.textContent = printingStandardsLock.adminKey;
+            lastModified.textContent = printingStandardsLock.lastModified;
+            modifiedBy.textContent = printingStandardsLock.modifiedBy;
+        }
+
+        // 切换锁定状态
+        function toggleLock() {
+            if (!validateAdminPassword()) return;
+
+            printingStandardsLock.isLocked = !printingStandardsLock.isLocked;
+            printingStandardsLock.lastModified = new Date().toLocaleDateString('zh-CN');
+            printingStandardsLock.modifiedBy = 'Administrator';
+
+            const action = printingStandardsLock.isLocked ? '锁定' : '解锁';
+            addLog(`印刷标准${action}操作 - 管理员执行`);
+            updateStatusDisplay();
+            
+            alert(`印刷标准已${action}！`);
+        }
+
+        // 修改密钥
+        function changeKey() {
+            if (!validateAdminPassword()) return;
+
+            const newKey = document.getElementById('newKey').value.trim();
+            if (!newKey) {
+                alert('请输入新密钥！');
+                return;
+            }
+
+            if (newKey.length < 8) {
+                alert('密钥长度至少8位！');
+                return;
+            }
+
+            const oldKey = printingStandardsLock.adminKey;
+            printingStandardsLock.adminKey = newKey;
+            printingStandardsLock.lastModified = new Date().toLocaleDateString('zh-CN');
+            printingStandardsLock.modifiedBy = 'Administrator';
+
+            addLog(`管理员密钥已更新 - 从 ${oldKey} 更改为 ${newKey}`);
+            updateStatusDisplay();
+            
+            document.getElementById('newKey').value = '';
+            alert('管理员密钥已成功更新！');
+        }
+
+        // 测试访问
+        function testAccess() {
+            const testKey = prompt('请输入要测试的密钥:');
+            if (testKey === printingStandardsLock.adminKey) {
+                addLog(`密钥测试成功 - 密钥: ${testKey}`);
+                alert('✅ 密钥验证成功！');
+            } else {
+                addLog(`密钥测试失败 - 尝试的密钥: ${testKey}`);
+                alert('❌ 密钥验证失败！');
+            }
+        }
+
+        // 紧急解锁
+        function emergencyUnlock() {
+            const confirmation = confirm('⚠️ 紧急解锁将立即解除所有印刷标准保护！\n此操作将被详细记录。\n\n确定要继续吗？');
+            if (!confirmation) return;
+
+            const reason = prompt('请输入紧急解锁原因:');
+            if (!reason) {
+                alert('必须提供解锁原因！');
+                return;
+            }
+
+            printingStandardsLock.isLocked = false;
+            printingStandardsLock.lastModified = new Date().toLocaleDateString('zh-CN');
+            printingStandardsLock.modifiedBy = 'Emergency Unlock';
+
+            addLog(`🚨 紧急解锁执行 - 原因: ${reason}`);
+            updateStatusDisplay();
+            
+            alert('🚨 紧急解锁完成！印刷标准保护已解除。');
+        }
+
+        // 页面加载时初始化
+        window.onload = function() {
+            updateStatusDisplay();
+            addLog('管理工具页面加载完成');
+        };
+
+        // 生成随机密钥
+        function generateRandomKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = 'ADMIN_';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('newKey').value = result;
+        }
+
+        // 添加生成随机密钥按钮
+        document.addEventListener('DOMContentLoaded', function() {
+            const newKeyInput = document.getElementById('newKey');
+            const generateBtn = document.createElement('button');
+            generateBtn.textContent = '🎲 生成随机密钥';
+            generateBtn.className = 'btn btn-primary';
+            generateBtn.type = 'button';
+            generateBtn.onclick = generateRandomKey;
+            newKeyInput.parentNode.appendChild(generateBtn);
+        });
+    </script>
+</body>
+</html>

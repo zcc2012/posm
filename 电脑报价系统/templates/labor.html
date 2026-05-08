@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人工管理 - 成本分析与报价系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6f42c1;
+            --primary-dark: #5a359a;
+            --primary-light: #8e6bc8;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            box-shadow: 0 2px 10px rgba(111, 66, 193, 0.3);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .main-container {
+            margin-top: 2rem;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .page-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .page-title i {
+            font-size: 2rem;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 1.5rem;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.4);
+        }
+        
+        .table {
+            margin: 0;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            color: var(--primary-color);
+            padding: 1rem 0.75rem;
+        }
+        
+        .table td {
+            border: none;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(111, 66, 193, 0.05);
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            margin: 0 0.125rem;
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-danger:hover {
+            transform: translateY(-1px);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+        }
+        
+        .search-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .skill-badge {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            margin: 0.125rem;
+        }
+        
+        .status-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-available { background-color: #d4edda; color: #155724; }
+        .status-busy { background-color: #fff3cd; color: #856404; }
+        .status-leave { background-color: #f8d7da; color: #721c24; }
+        .status-training { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>
+                成本分析与报价系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotations">报价管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers">客户管理</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-users"></i>
+                人工管理
+            </h1>
+            <p class="text-muted mb-0">管理人工成本信息，包括工种、技能等级、工时费率等</p>
+        </div>
+
+        <!-- 搜索和操作区域 -->
+        <div class="search-container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="searchInput" placeholder="搜索人工信息...">
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#laborModal">
+                        <i class="fas fa-plus me-2"></i>添加人工
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 人工列表 -->
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>人工列表</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>姓名</th>
+                                <th>工种</th>
+                                <th>技能等级</th>
+                                <th>基础时薪</th>
+                                <th>加班时薪</th>
+                                <th>状态</th>
+                                <th>联系方式</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="laborTableBody">
+                            <!-- 数据将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <i class="fas fa-users"></i>
+                    <h5>暂无人工信息</h5>
+                    <p>点击上方"添加人工"按钮开始添加人工信息</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑人工模态框 -->
+    <div class="modal fade" id="laborModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-user-plus me-2"></i>添加人工
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="laborForm">
+                        <input type="hidden" id="laborId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="laborName" class="form-label">姓名 *</label>
+                                <input type="text" class="form-control" id="laborName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="laborType" class="form-label">工种 *</label>
+                                <select class="form-select" id="laborType" required>
+                                    <option value="">请选择工种</option>
+                                    <option value="设计师">设计师</option>
+                                    <option value="制版师">制版师</option>
+                                    <option value="印刷工">印刷工</option>
+                                    <option value="装订工">装订工</option>
+                                    <option value="质检员">质检员</option>
+                                    <option value="包装工">包装工</option>
+                                    <option value="机械操作员">机械操作员</option>
+                                    <option value="维修工">维修工</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="skillLevel" class="form-label">技能等级 *</label>
+                                <select class="form-select" id="skillLevel" required>
+                                    <option value="">请选择技能等级</option>
+                                    <option value="初级">初级</option>
+                                    <option value="中级">中级</option>
+                                    <option value="高级">高级</option>
+                                    <option value="专家">专家</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="baseHourlyRate" class="form-label">基础时薪(元/小时) *</label>
+                                <input type="number" class="form-control" id="baseHourlyRate" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="overtimeRate" class="form-label">加班时薪(元/小时)</label>
+                                <input type="number" class="form-control" id="overtimeRate" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="laborStatus" class="form-label">状态 *</label>
+                                <select class="form-select" id="laborStatus" required>
+                                    <option value="">请选择状态</option>
+                                    <option value="可用">可用</option>
+                                    <option value="忙碌">忙碌</option>
+                                    <option value="请假">请假</option>
+                                    <option value="培训中">培训中</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="contactPhone" class="form-label">联系电话</label>
+                                <input type="tel" class="form-control" id="contactPhone">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">邮箱</label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="department" class="form-label">部门</label>
+                                <input type="text" class="form-control" id="department">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="workExperience" class="form-label">工作经验(年)</label>
+                                <input type="number" class="form-control" id="workExperience" min="0">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="hireDate" class="form-label">入职日期</label>
+                                <input type="date" class="form-control" id="hireDate">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="certifications" class="form-label">资质证书</label>
+                                <input type="text" class="form-control" id="certifications" placeholder="多个证书用逗号分隔">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="specialSkills" class="form-label">专业技能</label>
+                            <textarea class="form-control" id="specialSkills" rows="2" placeholder="描述专业技能和特长"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">备注</label>
+                            <textarea class="form-control" id="notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveLabor()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除这个人工信息吗？此操作不可撤销。</p>
+                    <div id="deleteInfo" class="alert alert-warning"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDeleteId = null;
+        let laborData = [];
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLabor();
+            
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', function() {
+                filterLabor(this.value);
+            });
+        });
+
+        // 加载人工数据
+        async function loadLabor() {
+            try {
+                const response = await fetch('/api/labor');
+                if (response.ok) {
+                    laborData = await response.json();
+                    displayLabor(laborData);
+                } else {
+                    console.error('加载人工数据失败');
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('加载人工数据时出错:', error);
+                showEmptyState();
+            }
+        }
+
+        // 显示人工数据
+        function displayLabor(data) {
+            const tbody = document.getElementById('laborTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (!data || data.length === 0) {
+                showEmptyState();
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = data.map(labor => `
+                <tr>
+                    <td>${labor.id}</td>
+                    <td><strong>${labor.name}</strong></td>
+                    <td>${labor.type}</td>
+                    <td><span class="skill-badge">${labor.skill_level}</span></td>
+                    <td>¥${parseFloat(labor.base_hourly_rate).toFixed(2)}</td>
+                    <td>¥${labor.overtime_rate ? parseFloat(labor.overtime_rate).toFixed(2) : '-'}</td>
+                    <td><span class="status-badge status-${getStatusClass(labor.status)}">${labor.status}</span></td>
+                    <td>${labor.contact_phone || '-'}</td>
+                    <td>
+                        <button class="btn btn-outline-primary btn-sm" onclick="editLabor(${labor.id})" title="编辑">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deleteLabor(${labor.id}, '${labor.name}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 获取状态样式类
+        function getStatusClass(status) {
+            const statusMap = {
+                '可用': 'available',
+                '忙碌': 'busy',
+                '请假': 'leave',
+                '培训中': 'training'
+            };
+            return statusMap[status] || 'available';
+        }
+
+        // 显示空状态
+        function showEmptyState() {
+            document.getElementById('laborTableBody').innerHTML = '';
+            document.getElementById('emptyState').style.display = 'block';
+        }
+
+        // 过滤人工数据
+        function filterLabor(searchTerm) {
+            if (!searchTerm.trim()) {
+                displayLabor(laborData);
+                return;
+            }
+            
+            const filtered = laborData.filter(labor => 
+                labor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                labor.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                labor.skill_level.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                labor.status.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            displayLabor(filtered);
+        }
+
+        // 编辑人工
+        async function editLabor(id) {
+            try {
+                const response = await fetch(`/api/labor/${id}`);
+                if (response.ok) {
+                    const labor = await response.json();
+                    
+                    // 填充表单
+                    document.getElementById('laborId').value = labor.id;
+                    document.getElementById('laborName').value = labor.name;
+                    document.getElementById('laborType').value = labor.type;
+                    document.getElementById('skillLevel').value = labor.skill_level;
+                    document.getElementById('baseHourlyRate').value = labor.base_hourly_rate;
+                    document.getElementById('overtimeRate').value = labor.overtime_rate || '';
+                    document.getElementById('laborStatus').value = labor.status;
+                    document.getElementById('contactPhone').value = labor.contact_phone || '';
+                    document.getElementById('email').value = labor.email || '';
+                    document.getElementById('department').value = labor.department || '';
+                    document.getElementById('workExperience').value = labor.work_experience || '';
+                    document.getElementById('hireDate').value = labor.hire_date || '';
+                    document.getElementById('certifications').value = labor.certifications || '';
+                    document.getElementById('specialSkills').value = labor.special_skills || '';
+                    document.getElementById('notes').value = labor.notes || '';
+                    
+                    // 更改模态框标题
+                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-edit me-2"></i>编辑人工';
+                    
+                    // 显示模态框
+                    new bootstrap.Modal(document.getElementById('laborModal')).show();
+                } else {
+                    alert('获取人工信息失败');
+                }
+            } catch (error) {
+                console.error('获取人工信息时出错:', error);
+                alert('获取人工信息时出错');
+            }
+        }
+
+        // 保存人工
+        async function saveLabor() {
+            const form = document.getElementById('laborForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const laborId = document.getElementById('laborId').value;
+            const laborData = {
+                name: document.getElementById('laborName').value,
+                type: document.getElementById('laborType').value,
+                skill_level: document.getElementById('skillLevel').value,
+                base_hourly_rate: parseFloat(document.getElementById('baseHourlyRate').value),
+                overtime_rate: document.getElementById('overtimeRate').value ? parseFloat(document.getElementById('overtimeRate').value) : null,
+                status: document.getElementById('laborStatus').value,
+                contact_phone: document.getElementById('contactPhone').value,
+                email: document.getElementById('email').value,
+                department: document.getElementById('department').value,
+                work_experience: document.getElementById('workExperience').value ? parseInt(document.getElementById('workExperience').value) : null,
+                hire_date: document.getElementById('hireDate').value,
+                certifications: document.getElementById('certifications').value,
+                special_skills: document.getElementById('specialSkills').value,
+                notes: document.getElementById('notes').value
+            };
+            
+            try {
+                const url = laborId ? `/api/labor/${laborId}` : '/api/labor';
+                const method = laborId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(laborData)
+                });
+                
+                if (response.ok) {
+                    // 关闭模态框
+                    bootstrap.Modal.getInstance(document.getElementById('laborModal')).hide();
+                    
+                    // 重新加载数据
+                    await loadLabor();
+                    
+                    // 重置表单
+                    resetForm();
+                    
+                    alert(laborId ? '人工信息更新成功！' : '人工信息添加成功！');
+                } else {
+                    const error = await response.json();
+                    alert('保存失败：' + (error.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('保存人工信息时出错:', error);
+                alert('保存人工信息时出错');
+            }
+        }
+
+        // 删除人工
+        function deleteLabor(id, name) {
+            currentDeleteId = id;
+            document.getElementById('deleteInfo').innerHTML = `<strong>人工信息：</strong>${name}`;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        // 确认删除
+        async function confirmDelete() {
+            if (!currentDeleteId) return;
+            
+            try {
+                const response = await fetch(`/api/labor/${currentDeleteId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    // 关闭模态框
+                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                    
+                    // 重新加载数据
+                    await loadLabor();
+                    
+                    alert('人工信息删除成功！');
+                } else {
+                    const error = await response.json();
+                    alert('删除失败：' + (error.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('删除人工信息时出错:', error);
+                alert('删除人工信息时出错');
+            }
+            
+            currentDeleteId = null;
+        }
+
+        // 重置表单
+        function resetForm() {
+            document.getElementById('laborForm').reset();
+            document.getElementById('laborId').value = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus me-2"></i>添加人工';
+        }
+
+        // 模态框关闭时重置表单
+        document.getElementById('laborModal').addEventListener('hidden.bs.modal', function() {
+            resetForm();
+        });
+    </script>
+</body>
+</html>

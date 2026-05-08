@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画面库管理 - 报价单管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .btn-action {
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        .modal-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 40px 0;
+        }
+        .price-display {
+            font-weight: bold;
+            color: #3498db;
+        }
+        .category-badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .graphic-preview {
+            width: 60px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>成本分析与报价系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers">
+                            <i class="fas fa-users me-1"></i>客户管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials">
+                            <i class="fas fa-boxes me-1"></i>材料库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes">
+                            <i class="fas fa-cogs me-1"></i>工艺库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotations">
+                            <i class="fas fa-file-invoice-dollar me-1"></i>报价单
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-image me-3"></i>画面库管理</h1>
+                    <p class="mb-0">管理报价单中的画面设计信息，包括喷绘、写真、贴膜等画面制作</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="category-badge">02 画面</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container my-4">
+        <!-- 报价单项目显示 -->
+        <div id="quotationItemsSection" class="mb-4" style="display: none;">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>报价单项目清单</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>材料名称</th>
+                                    <th>数量</th>
+                                    <th>尺寸 (长×宽)</th>
+                                    <th>工艺</th>
+                                    <th>面积 (㎡)</th>
+                                    <th>单价</th>
+                                    <th>单套小计</th>
+                                    <th>总计</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quotationItemsBody">
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-info">
+                                    <td colspan="8" class="text-end fw-bold">项目总计：</td>
+                                    <td class="fw-bold text-primary" id="totalAmount">¥0.00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button class="btn btn-success" onclick="proceedToNextStep()">
+                            <i class="fas fa-arrow-right me-2"></i>继续下一步
+                        </button>
+                        <button class="btn btn-outline-secondary ms-2" onclick="goBackToQuotation()">
+                            <i class="fas fa-arrow-left me-2"></i>返回修改
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#graphicModal" onclick="openAddModal()">
+                    <i class="fas fa-plus me-2"></i>添加画面
+                </button>
+                <button class="btn btn-outline-secondary ms-2" onclick="loadGraphics()">
+                    <i class="fas fa-sync-alt me-1"></i>刷新
+                </button>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索画面名称或类型...">
+                    <button class="btn btn-outline-secondary" type="button" onclick="searchGraphics()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 画面列表 -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>预览</th>
+                            <th>画面名称</th>
+                            <th>画面类型</th>
+                            <th>材质</th>
+                            <th>尺寸规格</th>
+                            <th>单位</th>
+                            <th>单价</th>
+                            <th>制作周期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="graphicTableBody">
+                        <tr>
+                            <td colspan="10" class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>
+                                正在加载画面数据...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 空状态提示 -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-image fa-5x text-muted mb-3"></i>
+            <h4 class="text-muted">暂无画面数据</h4>
+            <p class="text-muted">点击上方"添加画面"按钮开始添加画面信息</p>
+        </div>
+    </div>
+
+    <!-- 画面信息模态框 -->
+    <div class="modal fade" id="graphicModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-image me-2"></i>添加画面
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="graphicForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="graphicName" class="form-label">画面名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="graphicName" required placeholder="如：门头招牌画面、展板画面等">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="graphicType" class="form-label">画面类型</label>
+                                <select class="form-select" id="graphicType">
+                                    <option value="">请选择画面类型</option>
+                                    <option value="喷绘">喷绘</option>
+                                    <option value="写真">写真</option>
+                                    <option value="贴膜">贴膜</option>
+                                    <option value="UV打印">UV打印</option>
+                                    <option value="丝网印刷">丝网印刷</option>
+                                    <option value="数码印刷">数码印刷</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="graphicMaterial" class="form-label">画面材质</label>
+                                <select class="form-select" id="graphicMaterial">
+                                    <option value="">请选择材质</option>
+                                    <option value="户外喷绘布">户外喷绘布</option>
+                                    <option value="室内写真纸">室内写真纸</option>
+                                    <option value="背胶写真">背胶写真</option>
+                                    <option value="透明贴">透明贴</option>
+                                    <option value="车贴">车贴</option>
+                                    <option value="单孔透">单孔透</option>
+                                    <option value="灯箱片">灯箱片</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="graphicUnit" class="form-label">单位</label>
+                                <select class="form-select" id="graphicUnit">
+                                    <option value="">请选择单位</option>
+                                    <option value="平方米">平方米</option>
+                                    <option value="张">张</option>
+                                    <option value="套">套</option>
+                                    <option value="米">米</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="graphicPrice" class="form-label">单价 (元)</label>
+                                <input type="number" class="form-control" id="graphicPrice" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="graphicWidth" class="form-label">宽度 (mm)</label>
+                                <input type="number" class="form-control" id="graphicWidth" step="1" min="0" placeholder="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="graphicHeight" class="form-label">高度 (mm)</label>
+                                <input type="number" class="form-control" id="graphicHeight" step="1" min="0" placeholder="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="productionDays" class="form-label">制作周期 (天)</label>
+                                <input type="number" class="form-control" id="productionDays" step="1" min="0" placeholder="1">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="graphicResolution" class="form-label">分辨率要求</label>
+                                <select class="form-select" id="graphicResolution">
+                                    <option value="">请选择分辨率</option>
+                                    <option value="72dpi">72dpi (户外喷绘)</option>
+                                    <option value="150dpi">150dpi (室内写真)</option>
+                                    <option value="300dpi">300dpi (精细印刷)</option>
+                                    <option value="600dpi">600dpi (高精度)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="colorMode" class="form-label">色彩模式</label>
+                                <select class="form-select" id="colorMode">
+                                    <option value="">请选择色彩模式</option>
+                                    <option value="CMYK">CMYK (四色印刷)</option>
+                                    <option value="RGB">RGB (数码显示)</option>
+                                    <option value="专色">专色 (特殊颜色)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="finishingProcess" class="form-label">后期工艺</label>
+                                <input type="text" class="form-control" id="finishingProcess" placeholder="如：覆膜、裱板、打孔等">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="designFile" class="form-label">设计文件格式</label>
+                                <input type="text" class="form-control" id="designFile" placeholder="如：AI、PSD、CDR等">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="graphicDescription" class="form-label">备注说明</label>
+                            <textarea class="form-control" id="graphicDescription" rows="3" placeholder="可填写画面的详细描述、设计要求、制作注意事项等信息"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveGraphic()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteGraphicModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除画面 "<span id="deleteGraphicName"></span>" 吗？</p>
+                    <p class="text-muted small">此操作不可撤销，请谨慎操作。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteGraphic()">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let graphics = [];
+        let currentGraphicId = null;
+        let isEditMode = false;
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGraphics();
+            loadQuotationItems();
+        });
+
+        // 加载报价单项目
+        function loadQuotationItems() {
+            const quotationData = sessionStorage.getItem('quotationData');
+            if (quotationData) {
+                try {
+                    const data = JSON.parse(quotationData);
+                    displayQuotationItems(data.items, data.project_sets, data.total_amount);
+                    document.getElementById('quotationItemsSection').style.display = 'block';
+                } catch (error) {
+                    console.error('解析报价单数据失败:', error);
+                }
+            }
+        }
+
+        // 显示报价单项目
+         function displayQuotationItems(items, projectSets, totalAmount) {
+             const tbody = document.getElementById('quotationItemsBody');
+             tbody.innerHTML = '';
+ 
+             items.forEach((item, index) => {
+                 const area = item.area || ((item.length * item.width) / 1000000); // 使用传递的面积或重新计算
+                 const unitPrice = parseFloat(item.unit_price || 0);
+                 const subtotal = parseFloat(item.total_price || 0);
+                 const totalSubtotal = subtotal * projectSets; // 单套小计 × 套数
+ 
+                 const row = document.createElement('tr');
+                 row.innerHTML = `
+                     <td>${index + 1}</td>
+                     <td>${item.material_name}</td>
+                     <td>${item.quantity}</td>
+                     <td>${item.length}mm × ${item.width}mm</td>
+                     <td>${item.process_name}</td>
+                     <td>${area.toFixed(2)}</td>
+                     <td>¥${unitPrice.toFixed(2)}</td>
+                     <td>¥${subtotal.toFixed(2)}</td>
+                     <td class="fw-bold">¥${totalSubtotal.toFixed(2)}</td>
+                 `;
+                 tbody.appendChild(row);
+             });
+             
+             // 添加套数信息行
+             const setsInfoRow = document.createElement('tr');
+             setsInfoRow.className = 'table-info';
+             setsInfoRow.innerHTML = `
+                 <td colspan="8" class="text-end fw-bold">项目套数：${projectSets} 套</td>
+                 <td class="fw-bold">总计：¥${totalAmount.toFixed(2)}</td>
+             `;
+             tbody.appendChild(setsInfoRow);
+ 
+             document.getElementById('totalAmount').textContent = `¥${totalAmount.toFixed(2)}`;
+         }
+
+        // 继续下一步
+        function proceedToNextStep() {
+            // 这里可以跳转到下一个步骤，比如模具页面
+            window.location.href = '/molds';
+        }
+
+        // 返回修改报价单
+        function goBackToQuotation() {
+            window.location.href = '/quotation_new';
+        }
+
+        // 加载画面数据
+        function loadGraphics() {
+            fetch('/api/graphics')
+            .then(response => response.json())
+            .then(data => {
+                graphics = data;
+                displayGraphics(data);
+            })
+            .catch(error => {
+                console.error('Error loading graphics:', error);
+                showAlert('加载画面数据失败', 'danger');
+            });
+        }
+
+        // 显示画面列表
+        function displayGraphics(graphicsData) {
+            const tbody = document.getElementById('graphicTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (graphicsData.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = graphicsData.map(graphic => `
+                <tr>
+                    <td>${graphic.id}</td>
+                    <td>
+                        <div class="graphic-preview bg-light d-flex align-items-center justify-content-center">
+                            <i class="fas fa-image text-muted"></i>
+                        </div>
+                    </td>
+                    <td><strong>${graphic.name}</strong></td>
+                    <td><span class="badge bg-info">${graphic.type || '-'}</span></td>
+                    <td>${graphic.material || '-'}</td>
+                    <td>${formatSize(graphic.width, graphic.height)}</td>
+                    <td>${graphic.unit || '-'}</td>
+                    <td class="price-display">¥${(graphic.price || 0).toFixed(2)}</td>
+                    <td>${graphic.production_days || '-'}天</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary btn-action" onclick="editGraphic(${graphic.id})" title="编辑">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteGraphic(${graphic.id}, '${graphic.name}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 格式化尺寸显示
+        function formatSize(width, height) {
+            if (width && height) {
+                return `${width}×${height}mm`;
+            } else if (width) {
+                return `${width}mm`;
+            } else if (height) {
+                return `${height}mm`;
+            }
+            return '-';
+        }
+
+        // 搜索画面
+        function searchGraphics() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredGraphics = graphics.filter(graphic => 
+                graphic.name.toLowerCase().includes(searchTerm) ||
+                (graphic.type && graphic.type.toLowerCase().includes(searchTerm))
+            );
+            displayGraphics(filteredGraphics);
+        }
+
+        // 打开添加模态框
+        function openAddModal() {
+            isEditMode = false;
+            currentGraphicId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>添加画面';
+            document.getElementById('graphicForm').reset();
+        }
+
+        // 编辑画面
+        function editGraphic(id) {
+            const graphic = graphics.find(g => g.id === id);
+            if (!graphic) return;
+            
+            isEditMode = true;
+            currentGraphicId = id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑画面';
+            
+            // 填充表单数据
+            document.getElementById('graphicName').value = graphic.name || '';
+            document.getElementById('graphicType').value = graphic.type || '';
+            document.getElementById('graphicMaterial').value = graphic.material || '';
+            document.getElementById('graphicUnit').value = graphic.unit || '';
+            document.getElementById('graphicPrice').value = graphic.price || '';
+            document.getElementById('graphicWidth').value = graphic.width || '';
+            document.getElementById('graphicHeight').value = graphic.height || '';
+            document.getElementById('productionDays').value = graphic.production_days || '';
+            document.getElementById('graphicResolution').value = graphic.resolution || '';
+            document.getElementById('colorMode').value = graphic.color_mode || '';
+            document.getElementById('finishingProcess').value = graphic.finishing_process || '';
+            document.getElementById('designFile').value = graphic.design_file || '';
+            document.getElementById('graphicDescription').value = graphic.description || '';
+            
+            new bootstrap.Modal(document.getElementById('graphicModal')).show();
+        }
+
+        // 保存画面
+        function saveGraphic() {
+            const form = document.getElementById('graphicForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const graphicData = {
+                name: document.getElementById('graphicName').value,
+                type: document.getElementById('graphicType').value,
+                material: document.getElementById('graphicMaterial').value,
+                unit: document.getElementById('graphicUnit').value,
+                price: parseFloat(document.getElementById('graphicPrice').value) || 0,
+                width: parseInt(document.getElementById('graphicWidth').value) || 0,
+                height: parseInt(document.getElementById('graphicHeight').value) || 0,
+                production_days: parseInt(document.getElementById('productionDays').value) || 0,
+                resolution: document.getElementById('graphicResolution').value,
+                color_mode: document.getElementById('colorMode').value,
+                finishing_process: document.getElementById('finishingProcess').value,
+                design_file: document.getElementById('designFile').value,
+                description: document.getElementById('graphicDescription').value,
+                category: '02'
+            };
+            
+            const url = isEditMode ? `/api/graphics/${currentGraphicId}` : '/api/graphics';
+            const method = isEditMode ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(graphicData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('graphicModal')).hide();
+                    loadGraphics();
+                    showAlert(isEditMode ? '画面更新成功' : '画面添加成功', 'success');
+                } else {
+                    showAlert('操作失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('操作失败，请重试', 'danger');
+            });
+        }
+
+        // 删除画面
+        function deleteGraphic(id, name) {
+            currentGraphicId = id;
+            document.getElementById('deleteGraphicName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deleteGraphicModal')).show();
+        }
+
+        // 确认删除画面
+        function confirmDeleteGraphic() {
+            fetch(`/api/graphics/${currentGraphicId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('deleteGraphicModal')).hide();
+                    loadGraphics();
+                    showAlert('画面删除成功', 'success');
+                } else {
+                    showAlert('删除失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('删除失败，请重试', 'danger');
+            });
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        // 搜索框回车事件
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchGraphics();
+            }
+        });
+    </script>
+</body>
+</html>

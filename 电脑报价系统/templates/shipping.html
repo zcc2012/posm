@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运输库管理 - 报价单管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .btn-action {
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        .modal-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 40px 0;
+        }
+        .price-display {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .category-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .shipping-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>报价单管理系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers">
+                            <i class="fas fa-users me-1"></i>客户管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials">
+                            <i class="fas fa-boxes me-1"></i>材料库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes">
+                            <i class="fas fa-cogs me-1"></i>工艺库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotations">
+                            <i class="fas fa-file-invoice-dollar me-1"></i>报价单
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-truck me-3"></i>运输库管理</h1>
+                    <p class="mb-0">管理报价单中的运输费用信息，包括快递、物流、专车等运输方式</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="category-badge">07 运输</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container my-4">
+        <!-- 操作按钮 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#shippingModal" onclick="openAddModal()">
+                    <i class="fas fa-plus me-2"></i>添加运输方式
+                </button>
+                <button class="btn btn-outline-secondary ms-2" onclick="loadShipping()">
+                    <i class="fas fa-sync-alt me-1"></i>刷新
+                </button>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索运输方式或承运商...">
+                    <button class="btn btn-outline-secondary" type="button" onclick="searchShipping()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 运输列表 -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>图标</th>
+                            <th>运输方式</th>
+                            <th>承运商</th>
+                            <th>服务类型</th>
+                            <th>计费方式</th>
+                            <th>基础费用</th>
+                            <th>时效</th>
+                            <th>覆盖范围</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shippingTableBody">
+                        <tr>
+                            <td colspan="10" class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>
+                                正在加载运输数据...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 空状态提示 -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-truck fa-5x text-muted mb-3"></i>
+            <h4 class="text-muted">暂无运输数据</h4>
+            <p class="text-muted">点击上方"添加运输方式"按钮开始添加运输信息</p>
+        </div>
+    </div>
+
+    <!-- 运输信息模态框 -->
+    <div class="modal fade" id="shippingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-truck me-2"></i>添加运输方式
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="shippingForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="shippingName" class="form-label">运输方式名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="shippingName" required placeholder="如：顺丰快递、德邦物流等">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="shippingCarrier" class="form-label">承运商</label>
+                                <input type="text" class="form-control" id="shippingCarrier" placeholder="承运商名称">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="shippingType" class="form-label">运输类型</label>
+                                <select class="form-select" id="shippingType">
+                                    <option value="">请选择运输类型</option>
+                                    <option value="快递">快递</option>
+                                    <option value="物流">物流</option>
+                                    <option value="专车">专车</option>
+                                    <option value="航空">航空</option>
+                                    <option value="铁路">铁路</option>
+                                    <option value="海运">海运</option>
+                                    <option value="同城配送">同城配送</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="serviceType" class="form-label">服务类型</label>
+                                <select class="form-select" id="serviceType">
+                                    <option value="">请选择服务类型</option>
+                                    <option value="标准">标准</option>
+                                    <option value="加急">加急</option>
+                                    <option value="特快">特快</option>
+                                    <option value="次日达">次日达</option>
+                                    <option value="当日达">当日达</option>
+                                    <option value="定时达">定时达</option>
+                                    <option value="代收货款">代收货款</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="billingMethod" class="form-label">计费方式</label>
+                                <select class="form-select" id="billingMethod">
+                                    <option value="">请选择计费方式</option>
+                                    <option value="按重量">按重量</option>
+                                    <option value="按体积">按体积</option>
+                                    <option value="按件数">按件数</option>
+                                    <option value="按距离">按距离</option>
+                                    <option value="固定费用">固定费用</option>
+                                    <option value="重量体积取大">重量体积取大</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="baseFee" class="form-label">基础费用 (元)</label>
+                                <input type="number" class="form-control" id="baseFee" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="weightRate" class="form-label">重量费率 (元/kg)</label>
+                                <input type="number" class="form-control" id="weightRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="volumeRate" class="form-label">体积费率 (元/m³)</label>
+                                <input type="number" class="form-control" id="volumeRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="distanceRate" class="form-label">距离费率 (元/km)</label>
+                                <input type="number" class="form-control" id="distanceRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="deliveryTime" class="form-label">配送时效</label>
+                                <input type="text" class="form-control" id="deliveryTime" placeholder="如：1-3天、24小时内等">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="coverageArea" class="form-label">覆盖范围</label>
+                                <input type="text" class="form-control" id="coverageArea" placeholder="如：全国、同城、省内等">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="maxWeight" class="form-label">最大重量 (kg)</label>
+                                <input type="number" class="form-control" id="maxWeight" step="0.1" min="0" placeholder="0.0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="maxVolume" class="form-label">最大体积 (m³)</label>
+                                <input type="number" class="form-control" id="maxVolume" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="insuranceRate" class="form-label">保险费率 (%)</label>
+                                <input type="number" class="form-control" id="insuranceRate" step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="contactPhone" class="form-label">联系电话</label>
+                                <input type="text" class="form-control" id="contactPhone" placeholder="承运商联系电话">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="trackingSupport" class="form-label">物流跟踪</label>
+                                <select class="form-select" id="trackingSupport">
+                                    <option value="">请选择跟踪支持</option>
+                                    <option value="支持">支持</option>
+                                    <option value="不支持">不支持</option>
+                                    <option value="部分支持">部分支持</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="paymentMethod" class="form-label">付款方式</label>
+                                <select class="form-select" id="paymentMethod">
+                                    <option value="">请选择付款方式</option>
+                                    <option value="现付">现付</option>
+                                    <option value="到付">到付</option>
+                                    <option value="月结">月结</option>
+                                    <option value="预付">预付</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="specialService" class="form-label">特殊服务</label>
+                                <input type="text" class="form-control" id="specialService" placeholder="如：代收货款、签收回单等">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shippingDescription" class="form-label">备注说明</label>
+                            <textarea class="form-control" id="shippingDescription" rows="3" placeholder="可填写运输方式的详细描述、服务说明、注意事项等信息"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="saveShipping()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteShippingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除运输方式 "<span id="deleteShippingName"></span>" 吗？</p>
+                    <p class="text-muted small">此操作不可撤销，请谨慎操作。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteShipping()">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let shipping = [];
+        let currentShippingId = null;
+        let isEditMode = false;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadShipping();
+        });
+
+        // 加载运输数据
+        function loadShipping() {
+            fetch('/api/shipping')
+            .then(response => response.json())
+            .then(data => {
+                shipping = data;
+                displayShipping(data);
+            })
+            .catch(error => {
+                console.error('Error loading shipping:', error);
+                showAlert('加载运输数据失败', 'danger');
+            });
+        }
+
+        // 显示运输列表
+        function displayShipping(shippingData) {
+            const tbody = document.getElementById('shippingTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (shippingData.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = shippingData.map(ship => `
+                <tr>
+                    <td>${ship.id}</td>
+                    <td>
+                        <div class="shipping-icon">
+                            <i class="fas ${getShippingIcon(ship.type)} text-muted"></i>
+                        </div>
+                    </td>
+                    <td><strong>${ship.name}</strong></td>
+                    <td>${ship.carrier || '-'}</td>
+                    <td><span class="badge bg-info">${ship.service_type || '-'}</span></td>
+                    <td><span class="badge bg-secondary">${ship.billing_method || '-'}</span></td>
+                    <td class="price-display">¥${(ship.base_fee || 0).toFixed(2)}</td>
+                    <td>${ship.delivery_time || '-'}</td>
+                    <td>${ship.coverage_area || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary btn-action" onclick="editShipping(${ship.id})" title="编辑">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteShipping(${ship.id}, '${ship.name}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 获取运输方式图标
+        function getShippingIcon(type) {
+            const icons = {
+                '快递': 'fa-shipping-fast',
+                '物流': 'fa-truck',
+                '专车': 'fa-car',
+                '航空': 'fa-plane',
+                '铁路': 'fa-train',
+                '海运': 'fa-ship',
+                '同城配送': 'fa-motorcycle'
+            };
+            return icons[type] || 'fa-truck';
+        }
+
+        // 搜索运输
+        function searchShipping() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredShipping = shipping.filter(ship => 
+                ship.name.toLowerCase().includes(searchTerm) ||
+                (ship.carrier && ship.carrier.toLowerCase().includes(searchTerm))
+            );
+            displayShipping(filteredShipping);
+        }
+
+        // 打开添加模态框
+        function openAddModal() {
+            isEditMode = false;
+            currentShippingId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>添加运输方式';
+            document.getElementById('shippingForm').reset();
+        }
+
+        // 编辑运输
+        function editShipping(id) {
+            const ship = shipping.find(s => s.id === id);
+            if (!ship) return;
+            
+            isEditMode = true;
+            currentShippingId = id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑运输方式';
+            
+            // 填充表单数据
+            document.getElementById('shippingName').value = ship.name || '';
+            document.getElementById('shippingCarrier').value = ship.carrier || '';
+            document.getElementById('shippingType').value = ship.type || '';
+            document.getElementById('serviceType').value = ship.service_type || '';
+            document.getElementById('billingMethod').value = ship.billing_method || '';
+            document.getElementById('baseFee').value = ship.base_fee || '';
+            document.getElementById('weightRate').value = ship.weight_rate || '';
+            document.getElementById('volumeRate').value = ship.volume_rate || '';
+            document.getElementById('distanceRate').value = ship.distance_rate || '';
+            document.getElementById('deliveryTime').value = ship.delivery_time || '';
+            document.getElementById('coverageArea').value = ship.coverage_area || '';
+            document.getElementById('maxWeight').value = ship.max_weight || '';
+            document.getElementById('maxVolume').value = ship.max_volume || '';
+            document.getElementById('insuranceRate').value = ship.insurance_rate || '';
+            document.getElementById('contactPhone').value = ship.contact_phone || '';
+            document.getElementById('trackingSupport').value = ship.tracking_support || '';
+            document.getElementById('paymentMethod').value = ship.payment_method || '';
+            document.getElementById('specialService').value = ship.special_service || '';
+            document.getElementById('shippingDescription').value = ship.description || '';
+            
+            new bootstrap.Modal(document.getElementById('shippingModal')).show();
+        }
+
+        // 保存运输
+        function saveShipping() {
+            const form = document.getElementById('shippingForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const shippingData = {
+                name: document.getElementById('shippingName').value,
+                carrier: document.getElementById('shippingCarrier').value,
+                type: document.getElementById('shippingType').value,
+                service_type: document.getElementById('serviceType').value,
+                billing_method: document.getElementById('billingMethod').value,
+                base_fee: parseFloat(document.getElementById('baseFee').value) || 0,
+                weight_rate: parseFloat(document.getElementById('weightRate').value) || 0,
+                volume_rate: parseFloat(document.getElementById('volumeRate').value) || 0,
+                distance_rate: parseFloat(document.getElementById('distanceRate').value) || 0,
+                delivery_time: document.getElementById('deliveryTime').value,
+                coverage_area: document.getElementById('coverageArea').value,
+                max_weight: parseFloat(document.getElementById('maxWeight').value) || 0,
+                max_volume: parseFloat(document.getElementById('maxVolume').value) || 0,
+                insurance_rate: parseFloat(document.getElementById('insuranceRate').value) || 0,
+                contact_phone: document.getElementById('contactPhone').value,
+                tracking_support: document.getElementById('trackingSupport').value,
+                payment_method: document.getElementById('paymentMethod').value,
+                special_service: document.getElementById('specialService').value,
+                description: document.getElementById('shippingDescription').value,
+                category: '07'
+            };
+            
+            const url = isEditMode ? `/api/shipping/${currentShippingId}` : '/api/shipping';
+            const method = isEditMode ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(shippingData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('shippingModal')).hide();
+                    loadShipping();
+                    showAlert(isEditMode ? '运输方式更新成功' : '运输方式添加成功', 'success');
+                } else {
+                    showAlert('操作失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('操作失败，请重试', 'danger');
+            });
+        }
+
+        // 删除运输
+        function deleteShipping(id, name) {
+            currentShippingId = id;
+            document.getElementById('deleteShippingName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deleteShippingModal')).show();
+        }
+
+        // 确认删除运输
+        function confirmDeleteShipping() {
+            fetch(`/api/shipping/${currentShippingId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('deleteShippingModal')).hide();
+                    loadShipping();
+                    showAlert('运输方式删除成功', 'success');
+                } else {
+                    showAlert('删除失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('删除失败，请重试', 'danger');
+            });
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        // 搜索框回车事件
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchShipping();
+            }
+        });
+    </script>
+</body>
+</html>

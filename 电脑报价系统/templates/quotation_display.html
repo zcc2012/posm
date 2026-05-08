@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太仓明邦陈列展示用品有限公司报价单 - 报价单管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            transition: color 0.3s;
+        }
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .quotation-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        .company-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 25px;
+        }
+        .company-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .document-title {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .quotation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .quotation-table th,
+        .quotation-table td {
+            border: 1px solid #dee2e6;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        .quotation-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-align: center;
+        }
+        .quotation-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .quotation-table tbody tr:hover {
+            background-color: #e3f2fd;
+        }
+        .quotation-table td:nth-child(3),
+        .quotation-table td:nth-child(4) {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .quotation-table .summary-row td:nth-child(3) {
+            text-align: left;
+            white-space: normal;
+        }
+        .item-number {
+            width: 80px;
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+        }
+        .item-name {
+            width: 250px;
+            font-weight: 500;
+        }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px;
+            color: rgba(102, 126, 234, 0.1);
+            font-weight: bold;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+        }
+        .project-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        .project-info h5 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .project-info .row div {
+            margin-bottom: 8px;
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            margin: 0 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        .btn-secondary-custom {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            margin: 0 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-secondary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        .total-row {
+            background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%) !important;
+            font-weight: 600;
+        }
+        .summary-row {
+            background: linear-gradient(135deg, #e8f5e8 0%, #f3e5f5 100%) !important;
+            font-weight: 600;
+        }
+        @media print {
+            .navbar, .page-header, .btn-custom, .btn-secondary-custom {
+                display: none !important;
+            }
+            .quotation-container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>报价单管理系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers">
+                            <i class="fas fa-users me-1"></i>客户管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials">
+                            <i class="fas fa-boxes me-1"></i>材料库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes">
+                            <i class="fas fa-cogs me-1"></i>工艺库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotation_new">
+                            <i class="fas fa-plus me-1"></i>新建报价单
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container text-center">
+            <h1 class="mb-0">
+                <i class="fas fa-file-invoice-dollar me-3"></i>报价单详情
+            </h1>
+        </div>
+    </div>
+
+    <div class="watermark">第1页</div>
+    
+    <div class="container">
+        <div class="content-wrapper">
+            <div class="quotation-container">
+                <div class="company-header">
+                    <div class="company-name">太仓明邦陈列展示用品有限公司</div>
+                    <div class="document-title">报价单</div>
+                </div>
+                
+                <!-- 项目信息卡片 -->
+                <div class="project-info" id="projectInfo" style="display: none;">
+                    <h5><i class="fas fa-info-circle me-2"></i>项目信息</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>项目套数:</strong> <span id="projectSets">-</span> 套
+                        </div>
+                        <div class="col-md-4">
+                            <strong>报价日期:</strong> <span id="quotationDate">-</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>项目明细:</strong> <span id="itemCount">-</span> 个项目
+                        </div>
+                    </div>
+                </div>
+            
+            <table class="quotation-table">
+                <thead>
+                    <tr>
+                        <th class="item-number">序号</th>
+                        <th class="item-name">项目</th>
+                        <th>单价</th>
+                        <th>总价</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="item-number">01</td>
+                        <td>主材料</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="item-number">02</td>
+                        <td>画面</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="item-number">03</td>
+                        <td>模具</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="item-number">04</td>
+                        <td>加工费用合计</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="item-number">05</td>
+                        <td>配件</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="item-number">06</td>
+                        <td>包装</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="item-number">07</td>
+                        <td>运输</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="item-number">08</td>
+                        <td>人工</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td class="item-number">09</td>
+                        <td>成本合计（01-08费用合计）</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="item-number">10</td>
+                        <td>管理费利润（09*7%）</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="item-number">11</td>
+                        <td>增值税（11*17%）</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr class="summary-row">
+                        <td class="item-number">12</td>
+                        <td>价格汇总</td>
+                        <td colspan="2">
+                            <div class="mb-1"><strong>产品不含税单价 / 总价</strong></div>
+                            <div><strong>产品含税单价 / 总价</strong></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+                
+                <div class="text-center mt-4">
+                    <button class="btn btn-custom" onclick="printQuotation()">
+                        <i class="fas fa-print me-2"></i>打印报价单
+                    </button>
+                    <button class="btn btn-custom" onclick="exportPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>导出PDF
+                    </button>
+                    <button class="btn btn-secondary-custom" onclick="goBack()">
+                        <i class="fas fa-arrow-left me-2"></i>返回
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script>
+        // 从sessionStorage获取报价单数据
+        console.log('=== 开始获取报价单数据 ===');
+        const quotationDataStr = sessionStorage.getItem('quotationData');
+        console.log('从sessionStorage获取的数据:', quotationDataStr);
+        let quotationData = null;
+        
+        if (quotationDataStr) {
+            try {
+                quotationData = JSON.parse(quotationDataStr);
+                console.log('解析后的报价单数据:', quotationData);
+                console.log('项目套数:', quotationData.project_sets);
+                console.log('项目数量:', quotationData.items.length);
+                
+                // 检查每个项目的数据
+                quotationData.items.forEach((item, index) => {
+                    console.log(`项目 ${index + 1}:`, {
+                        material_name: item.material_name,
+                        process_name: item.process_name,
+                        material_square_price: item.material_square_price,
+                        quantity: item.quantity,
+                        area: item.area,
+                        length: item.length,
+                        width: item.width
+                    });
+                });
+            } catch (error) {
+                console.error('解析报价单数据出错:', error);
+                quotationData = {};
+            }
+        } else {
+            console.error('未找到报价单数据');
+            quotationData = {};
+        }
+        
+        // 页面加载时填充数据
+         window.onload = async function() {
+             await fillQuotationData();
+         };
+        
+        async function fillQuotationData() {
+            console.log('=== 开始填充报价单数据 ===');
+            console.log('完整报价单数据:', quotationData);
+            
+            if (!quotationData || !quotationData.items || quotationData.items.length === 0) {
+                console.log('错误：没有找到报价单数据');
+                return;
+            }
+            
+            console.log('项目套数:', quotationData.project_sets);
+            console.log('项目数量:', quotationData.items.length);
+            
+            // 检查每个项目的数据
+            quotationData.items.forEach((item, index) => {
+                console.log(`项目 ${index + 1}:`, {
+                    material_name: item.material_name,
+                    process_name: item.process_name,
+                    material_square_price: item.material_square_price,
+                    quantity: item.quantity,
+                    area: item.area,
+                    length: item.length,
+                    width: item.width
+                });
+            });
+            
+            // 计算各项费用
+            let mainMaterialCost = 0;
+            let graphicsCost = 0;
+            let moldCost = 0;
+            let processingCost = 0;
+            let accessoriesCost = 0;
+            let packagingCost = 0;
+            let shippingCost = 0;
+            let laborCost = 0;
+            const projectSets = quotationData.project_sets || 1;
+            const hasManualCosts = !!quotationData.manual_costs;
+            const manualCosts = normalizeManualCosts(quotationData.manual_costs, projectSets);
+            
+            function getLocalProcessStandard(processType, length, width) {
+                const maxDimension = Math.max(length, width);
+                const minDimension = Math.min(length, width);
+
+                if (processType === 'printing') {
+                    if (maxDimension <= 719 && minDimension <= 519) return { name: '4开机器', basePrice: 600, squarePrice: 0.15 };
+                    if (maxDimension >= 720 && maxDimension <= 1019 && minDimension >= 520 && minDimension <= 719) return { name: '对开机', basePrice: 1000, squarePrice: 0.25 };
+                    if (maxDimension >= 1020 && maxDimension <= 1419 && minDimension >= 720 && minDimension <= 1019) return { name: '全开机', basePrice: 1500, squarePrice: 0.3 };
+                    if (maxDimension >= 1420 && maxDimension <= 1620 && minDimension >= 1020 && minDimension <= 1220) return { name: '大全开', basePrice: 2000, squarePrice: 0.35 };
+                    return { name: '大幅面印刷', basePrice: 2000, squarePrice: 0.4 };
+                }
+
+                if (processType === 'die-cutting') {
+                    if (maxDimension >= 480 && maxDimension <= 650 && minDimension >= 340 && minDimension <= 450) return { name: '4开模切', basePrice: 100, squarePrice: 0.15 };
+                    if (maxDimension >= 650 && maxDimension <= 1020 && minDimension >= 450 && minDimension <= 720) return { name: '对开模切', basePrice: 150, squarePrice: 0.2 };
+                    if (maxDimension >= 1020 && maxDimension <= 1420 && minDimension >= 720 && minDimension <= 1020) return { name: '全开模切', basePrice: 200, squarePrice: 0.25 };
+                    if (maxDimension >= 1420 && maxDimension <= 1620 && minDimension >= 1020 && minDimension <= 1220) return { name: '大全开模切', basePrice: 250, squarePrice: 0.3 };
+                    return { name: '大幅面模切', basePrice: 200, squarePrice: 0.25 };
+                }
+
+                if (processType === 'cutting') {
+                    if (maxDimension >= 480 && maxDimension <= 650 && minDimension >= 340 && minDimension <= 450) return { name: '4开切割', basePrice: 80, squarePrice: 0.12 };
+                    if (maxDimension >= 650 && maxDimension <= 1020 && minDimension >= 450 && minDimension <= 720) return { name: '对开切割', basePrice: 120, squarePrice: 0.15 };
+                    if (maxDimension >= 1020 && maxDimension <= 1420 && minDimension >= 720 && minDimension <= 1020) return { name: '全开切割', basePrice: 160, squarePrice: 0.2 };
+                    if (maxDimension >= 1420 && maxDimension <= 1620 && minDimension >= 1020 && minDimension <= 1220) return { name: '大全开切割', basePrice: 200, squarePrice: 0.25 };
+                    return { name: '大幅面切割', basePrice: 160, squarePrice: 0.2 };
+                }
+
+                if (processType === 'varnish') {
+                    if (maxDimension >= 480 && maxDimension <= 650 && minDimension >= 340 && minDimension <= 450) return { name: '4开光油', basePrice: 80, squarePrice: 0.1 };
+                    if (maxDimension >= 650 && maxDimension <= 1020 && minDimension >= 450 && minDimension <= 720) return { name: '对开光油', basePrice: 120, squarePrice: 0.15 };
+                    if (maxDimension >= 1020 && maxDimension <= 1420 && minDimension >= 720 && minDimension <= 1020) return { name: '全开光油', basePrice: 150, squarePrice: 0.2 };
+                    if (maxDimension >= 1420 && maxDimension <= 1620 && minDimension >= 1020 && minDimension <= 1220) return { name: '大全开光油', basePrice: 180, squarePrice: 0.25 };
+                    return { name: '大幅面光油', basePrice: 150, squarePrice: 0.2 };
+                }
+
+                if (processType === 'lamination') {
+                    if (maxDimension >= 480 && maxDimension <= 650 && minDimension >= 340 && minDimension <= 450) return { name: '4开覆膜', basePrice: 100, squarePrice: 0.2 };
+                    if (maxDimension >= 650 && maxDimension <= 1020 && minDimension >= 450 && minDimension <= 720) return { name: '对开覆膜', basePrice: 150, squarePrice: 0.25 };
+                    if (maxDimension >= 1020 && maxDimension <= 1420 && minDimension >= 720 && minDimension <= 1020) return { name: '全开覆膜', basePrice: 200, squarePrice: 0.3 };
+                    if (maxDimension >= 1420 && maxDimension <= 1620 && minDimension >= 1020 && minDimension <= 1220) return { name: '大全开覆膜', basePrice: 250, squarePrice: 0.35 };
+                    return { name: '大幅面覆膜', basePrice: 180, squarePrice: 0.3 };
+                }
+
+                return { name: '标准工艺', basePrice: 0, squarePrice: 0 };
+            }
+
+            // 从API获取工艺标准
+            async function getProcessStandard(processType, length, width, quantity = 1, item = {}) {
+                try {
+                    // 根据工艺类型映射到数据库中的工艺名称
+                    let processName = '';
+                    switch(processType) {
+                        case 'printing':
+                            processName = '印刷';
+                            break;
+                        case 'die-cutting':
+                            processName = '模切';
+                            break;
+                        case 'cutting':
+                            processName = '切割';
+                            break;
+                        case 'varnish':
+                            processName = '光油';
+                            break;
+                        case 'lamination':
+                            processName = '覆膜';
+                            break;
+                        default:
+                            processName = processType;
+                    }
+                    
+                    const response = await fetch('/api/pricing_standards/match', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            process_name: processName,
+                            material_name: item.material_name || '',
+                            material_category_id: item.material_category_id || '',
+                            material_category_name: item.material_category_name || '',
+                            length: length,
+                            width: width,
+                            quantity: quantity
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    const fallback = getLocalProcessStandard(processType, length, width);
+                    return normalizeMatchedStandard(result.standard, fallback);
+                } catch (error) {
+                    console.error('获取工艺标准失败:', error);
+                    // 出错时返回默认值
+                    return getLocalProcessStandard(processType, length, width);
+                }
+            }
+
+            function normalizeMatchedStandard(standard, fallback) {
+                if (!standard) return fallback;
+                const source = standard.type === 'combined' && Array.isArray(standard.components) && standard.components.length > 0
+                    ? standard.components[0]
+                    : standard;
+                return {
+                    name: source.name || fallback.name,
+                    basePrice: parseFloat(source.base_price) || 0,
+                    squarePrice: parseFloat(source.square_price) || 0,
+                    raw: source
+                };
+            }
+
+            function includesAny(text, keywords) {
+                const value = String(text || '').toLowerCase();
+                return keywords.some(keyword => value.includes(String(keyword).toLowerCase()));
+            }
+
+            function getItemArea(item) {
+                if (item.area && item.area > 0) return item.area;
+                if (item.length && item.width) {
+                    return ((item.length + 30) * (item.width + 30)) / 1000000;
+                }
+                return 0;
+            }
+
+            function getMaterialCost(item, projectSets) {
+                const materialSquarePrice = parseFloat(item.material_square_price) || 0;
+                return materialSquarePrice * getItemArea(item) * projectSets;
+            }
+
+            function getTieredPrintingOverflowQuantity(totalQuantity) {
+                return Math.max((Number(totalQuantity) || 0) - 3000, 0);
+            }
+
+            function getTieredPrintingTotalCost(basePrice, squarePrice, area, totalQuantity) {
+                const baseCost = Number(basePrice) || 0;
+                const overflowQuantity = getTieredPrintingOverflowQuantity(totalQuantity);
+                const overflowCost = (Number(area) || 0) * (Number(squarePrice) || 0) * overflowQuantity;
+                return baseCost + overflowCost;
+            }
+
+            function normalizeManualCosts(manualCosts, projectSets) {
+                const source = manualCosts || {};
+                const normalize = key => {
+                    const item = source[key] || {};
+                    const unitPrice = parseFloat(item.unit_price ?? item.unitPrice ?? 0) || 0;
+                    const totalPrice = parseFloat(item.total_price ?? item.totalPrice ?? unitPrice * projectSets) || unitPrice * projectSets;
+                    return { unitPrice, totalPrice };
+                };
+                
+                return {
+                    packaging: normalize('packaging'),
+                    shipping: normalize('shipping'),
+                    labor: normalize('labor')
+                };
+            }
+
+            function setAmountRow(row, totalAmount, projectSets, unitAmount = null) {
+                if (!row) return;
+                const total = parseFloat(totalAmount) || 0;
+                const unit = unitAmount === null ? total / Math.max(projectSets, 1) : (parseFloat(unitAmount) || 0);
+                
+                row.cells[2].textContent = unit.toFixed(2) + ' 元';
+                row.cells[3].textContent = total.toFixed(2) + ' 元';
+            }
+
+            function getItemClass(item) {
+                const materialName = item.material_name || '';
+                const categoryName = item.material_category_name || '';
+                const baseProcesses = Array.isArray(item.process_base_processes) ? item.process_base_processes.join(' ') : '';
+                const processName = `${item.process_name || ''} ${baseProcesses}`;
+                const materialText = `${materialName} ${categoryName}`;
+                const allText = `${materialText} ${processName}`;
+                const isGraphicsMaterial = includesAny(materialText, ['画面', '写真', '喷绘', '背胶', 'pp', 'UV', '印刷']);
+                const isGraphicsProcess = includesAny(processName, ['印刷', '写真', '喷绘', 'UV']);
+                return {
+                    materialName,
+                    categoryName,
+                    processName,
+                    isGraphicsMaterial,
+                    isGraphicsProcess,
+                    isLabor: includesAny(allText, ['人工', '安装', '工时']),
+                    isAccessory: includesAny(allText, ['配件']),
+                    isPackaging: includesAny(allText, ['包装']),
+                    isShipping: includesAny(allText, ['运输', '物流'])
+                };
+            }
+            
+            // 异步计算各项费用
+            for (const item of quotationData.items) {
+                const projectSets = quotationData.project_sets || 1;
+                const itemTotal = (parseFloat(item.total_price) || 0) * projectSets;
+                const itemClass = getItemClass(item);
+                
+                // 主材料费用计算
+                console.log(`开始计算项目主材料费用: ${item.material_name}`);
+                console.log(`原始数据: 长度=${item.length}, 宽度=${item.width}, 面积=${item.area}, 材料平方单价=${item.material_square_price}`);
+                
+                // 材料只按材料本身归类；印刷/写真/UV工艺单独进入画面费用，不能把主材料挤掉。
+                const isMainMaterial = !itemClass.isGraphicsMaterial &&
+                                      !itemClass.isLabor &&
+                                      !itemClass.isAccessory &&
+                                      !itemClass.isPackaging &&
+                                      !itemClass.isShipping;
+                
+                console.log(`是否为主材料: ${isMainMaterial}`);
+                
+                if (isMainMaterial) {
+                    const area = getItemArea(item);
+                    const materialSquarePrice = parseFloat(item.material_square_price) || 0;
+                    const materialCost = getMaterialCost(item, projectSets);
+                    console.log(`计算公式: ${materialSquarePrice} * ${area.toFixed(4)} * ${projectSets} = ${materialCost.toFixed(2)}元`);
+                    mainMaterialCost += materialCost;
+                    console.log(`累计主材料费用: ${mainMaterialCost.toFixed(2)}元`);
+                } else {
+                    console.log(`跳过非主材料: ${item.material_name}, 工艺: ${item.process_name}`);
+                }
+                
+                // 画面费用计算：画面/写真材料 + 印刷/写真/UV工艺单独归集
+                if (itemClass.isGraphicsMaterial || itemClass.isGraphicsProcess) {
+                    
+                    const quantity = item.quantity || 1;
+                    const totalQuantity = projectSets * quantity;
+                    const area = getItemArea(item);
+                    const length = item.length || 0;
+                    const width = item.width || 0;
+                    let itemGraphicsCost = 0;
+
+                    if (itemClass.isGraphicsMaterial) {
+                        const graphicsMaterialCost = getMaterialCost(item, projectSets);
+                        itemGraphicsCost += graphicsMaterialCost;
+                        console.log(`画面材料费用: ${graphicsMaterialCost.toFixed(2)}元`);
+                    }
+                    
+                    if (item.process_name.includes('印刷')) {
+                        // 印刷工艺分段：3000内按基础价，超出部分按每张平方价追加。
+                        const standard = await getProcessStandard('printing', length, width, totalQuantity, item);
+                        itemGraphicsCost += getTieredPrintingTotalCost(standard.basePrice, standard.squarePrice, area, totalQuantity);
+                    } else if (item.process_name.includes('写真')) {
+                        // 写真工艺：价格*数量
+                        const unitPrice = parseFloat(item.unit_price) || 0;
+                        itemGraphicsCost += unitPrice * totalQuantity;
+                    } else if (item.process_name.includes('UV')) {
+                        // UV工艺：后期添加的UV工艺费用
+                        const uvCost = parseFloat(item.total_price) || 0;
+                        itemGraphicsCost += uvCost * projectSets;
+                    } else if (!itemClass.isGraphicsMaterial) {
+                        // 其他画面相关费用
+                        itemGraphicsCost += itemTotal;
+                    }
+
+                    graphicsCost += itemGraphicsCost;
+                }
+                
+                // 加工费用计算 - 按照正确的公式
+                const quantity = item.quantity || 1;
+                const totalQuantity = projectSets * quantity;
+                const area = item.area || ((item.length + 30) * (item.width + 30)) / 1000000;
+                const length = item.length || 0;
+                const width = item.width || 0;
+                const processName = itemClass.processName;
+                
+                // 处理组合工艺，分别计算每个工艺的费用
+                let itemProcessingCost = 0;
+                let processDetails = [];
+                
+                // 加工费用计算：各个工艺的单个平方价格*项目数量
+                // 注意：印刷、写真、UV工艺的费用已在画面费用中计算，这里不重复计算
+                
+                // 模切工艺加工费用
+                if (processName.includes('模切')) {
+                    const standard = await getProcessStandard('die-cutting', length, width, totalQuantity, item);
+                    const squarePrice = standard.squarePrice || parseFloat(item.process_square_price) || 0;
+                    // 加工费用：尺寸*工艺平方单价*部件数量（totalQuantity已包含项目套数）
+                    const dieCuttingProcessCost = area * squarePrice * totalQuantity;
+                    itemProcessingCost += dieCuttingProcessCost;
+                    processDetails.push(`模切加工: ${dieCuttingProcessCost.toFixed(2)}元`);
+                }
+                
+                // 切割工艺加工费用
+                if (processName.includes('切割')) {
+                    const standard = await getProcessStandard('cutting', length, width, totalQuantity, item);
+                    const squarePrice = standard.squarePrice || parseFloat(item.process_square_price) || 0;
+                    // 加工费用：尺寸*工艺平方单价*部件数量（totalQuantity已包含项目套数）
+                    const cuttingProcessCost = area * squarePrice * totalQuantity;
+                    itemProcessingCost += cuttingProcessCost;
+                    processDetails.push(`切割加工: ${cuttingProcessCost.toFixed(2)}元`);
+                }
+                
+                // 光油工艺加工费用
+                if (processName.includes('光油')) {
+                    const standard = await getProcessStandard('varnish', length, width, totalQuantity, item);
+                    const squarePrice = standard.squarePrice || parseFloat(item.process_square_price) || 0;
+                    // 加工费用：尺寸*工艺平方单价*部件数量（totalQuantity已包含项目套数）
+                    const varnishProcessCost = area * squarePrice * totalQuantity;
+                    itemProcessingCost += varnishProcessCost;
+                    processDetails.push(`光油加工: ${varnishProcessCost.toFixed(2)}元`);
+                }
+                
+                // 覆膜工艺加工费用
+                if (processName.includes('覆膜') || processName.includes('光膜')) {
+                    const standard = await getProcessStandard('lamination', length, width, totalQuantity, item);
+                    const squarePrice = standard.squarePrice || parseFloat(item.process_square_price) || 0;
+                    // 加工费用：尺寸*工艺平方单价*部件数量（totalQuantity已包含项目套数）
+                    const laminationProcessCost = area * squarePrice * totalQuantity;
+                    itemProcessingCost += laminationProcessCost;
+                    processDetails.push(`覆膜加工: ${laminationProcessCost.toFixed(2)}元`);
+                }
+                
+                // 其他加工工艺（排除印刷、写真、UV、模具相关）
+                if (processName.includes('加工') && 
+                    !processName.includes('印刷') && !processName.includes('写真') && 
+                    !processName.includes('UV') && !processName.includes('模具') &&
+                    !processName.includes('模切') && !processName.includes('切割') && 
+                    !processName.includes('光油') && !processName.includes('覆膜') && 
+                    !processName.includes('光膜')) {
+                    const processSquarePrice = parseFloat(item.process_square_price) || parseFloat(item.square_price) || 0;
+                    // 加工费用：尺寸*工艺平方单价*部件数量（totalQuantity已包含项目套数）
+                    const otherProcessCost = area * processSquarePrice * totalQuantity;
+                    itemProcessingCost += otherProcessCost;
+                    processDetails.push(`其他加工: ${otherProcessCost.toFixed(2)}元`);
+                }
+                
+                processingCost += itemProcessingCost;
+                
+                // 显示工艺费用明细
+                if (processDetails.length > 0) {
+                    console.log(`${item.material_name} 工艺费用明细: ${processDetails.join(' + ')} = ${itemProcessingCost.toFixed(2)}元`);
+                }
+                
+                // 模具费用计算：判定标准中的模具基础价格
+                if (processName.includes('模具') || itemClass.materialName.includes('模具') ||
+                    processName.includes('模切') || processName.includes('切割')) {
+                    // 根据尺寸获取对应的模具基础价格
+                    let moldStandard;
+                    if (processName.includes('模切')) {
+                        moldStandard = await getProcessStandard('die-cutting', length, width, totalQuantity, item);
+                    } else if (processName.includes('切割')) {
+                        moldStandard = await getProcessStandard('cutting', length, width, totalQuantity, item);
+                    } else {
+                        // 默认使用模切标准
+                        moldStandard = await getProcessStandard('die-cutting', length, width, totalQuantity, item);
+                    }
+                    
+                    // 模具费用就是判定标准中的基础价格
+                    moldCost += moldStandard.basePrice || parseFloat(item.process_base_price) || 0;
+                }
+            }
+            
+            // 如果没有明确的模具项目，根据项目中是否有需要模具的工艺来估算模具费用
+            if (moldCost === 0) {
+                let hasProcessNeedingMold = false;
+                quotationData.items.forEach(item => {
+                    const processName = item.process_name || '';
+                    if (processName.includes('模切') || processName.includes('切割')) {
+                        hasProcessNeedingMold = true;
+                    }
+                });
+                
+                if (hasProcessNeedingMold) {
+                    // 使用默认的模切标准基础价格
+                    const defaultMoldStandard = await getProcessStandard('die-cutting', 1000, 700); // 使用对开尺寸作为默认
+                    moldCost = defaultMoldStandard.basePrice;
+                }
+            }
+            
+            if (hasManualCosts) {
+                packagingCost = manualCosts.packaging.totalPrice;
+                shippingCost = manualCosts.shipping.totalPrice;
+                laborCost = manualCosts.labor.totalPrice;
+            }
+            
+            // 配件仍从项目明细归集；包装、运输、人工优先使用手工录入。
+            quotationData.items.forEach(item => {
+                const itemTotal = (parseFloat(item.total_price) || 0) * projectSets;
+                const itemClass = getItemClass(item);
+                
+                if (itemClass.isAccessory) {
+                    accessoriesCost += itemTotal;
+                } else if (!hasManualCosts && itemClass.isPackaging) {
+                    packagingCost += itemTotal;
+                } else if (!hasManualCosts && itemClass.isShipping) {
+                    shippingCost += itemTotal;
+                } else if (!hasManualCosts && itemClass.isLabor) {
+                    laborCost += itemTotal;
+                }
+            });
+            
+            // 计算合计
+            const totalCost = mainMaterialCost + graphicsCost + moldCost + processingCost + 
+                            accessoriesCost + packagingCost + shippingCost + laborCost;
+            
+            const managementFee = totalCost * 0.07; // 管理费利润7%
+            const vatTax = (totalCost + managementFee) * 0.17; // 增值税17%
+            
+            const priceExcludingTax = totalCost + managementFee;
+            const priceIncludingTax = totalCost + managementFee + vatTax;
+            
+            // 填充表格数据
+            console.log('=== 开始填充表格数据 ===');
+            console.log(`主材料费用: ${mainMaterialCost.toFixed(2)}元`);
+            console.log(`画面费用: ${graphicsCost.toFixed(2)}元`);
+            console.log(`模具费用: ${moldCost.toFixed(2)}元`);
+            console.log(`加工费用: ${processingCost.toFixed(2)}元`);
+            
+            const tableRows = document.querySelectorAll('.quotation-table tbody tr');
+            console.log(`找到表格行数: ${tableRows.length}`);
+            
+            // 更新各行数据
+            setAmountRow(tableRows[0], mainMaterialCost, projectSets);
+            setAmountRow(tableRows[1], graphicsCost, projectSets);
+            setAmountRow(tableRows[2], moldCost, projectSets);
+            setAmountRow(tableRows[3], processingCost, projectSets);
+            setAmountRow(tableRows[4], accessoriesCost, projectSets);
+            setAmountRow(tableRows[5], packagingCost, projectSets, hasManualCosts ? manualCosts.packaging.unitPrice : null);
+            setAmountRow(tableRows[6], shippingCost, projectSets, hasManualCosts ? manualCosts.shipping.unitPrice : null);
+            setAmountRow(tableRows[7], laborCost, projectSets, hasManualCosts ? manualCosts.labor.unitPrice : null);
+            setAmountRow(tableRows[8], totalCost, projectSets);
+            setAmountRow(tableRows[9], managementFee, projectSets);
+            setAmountRow(tableRows[10], vatTax, projectSets);
+            
+            // 更新价格汇总
+            if (tableRows[11]) {
+                tableRows[11].cells[2].innerHTML = 
+                    `<div>产品不含税单价为 ${(priceExcludingTax / Math.max(projectSets, 1)).toFixed(2)} 元，产品不含税总价（09+10）为 ${priceExcludingTax.toFixed(2)} 元</div>
+                     <div>产品含税单价为 ${(priceIncludingTax / Math.max(projectSets, 1)).toFixed(2)} 元，产品含税总价（09+10+11）为 ${priceIncludingTax.toFixed(2)} 元</div>`;
+            }
+            
+            // 显示项目信息
+             const projectInfo = document.getElementById('projectInfo');
+             const projectSetsEl = document.getElementById('projectSets');
+             const quotationDateEl = document.getElementById('quotationDate');
+             const itemCountEl = document.getElementById('itemCount');
+             
+             projectSetsEl.textContent = quotationData.project_sets || 1;
+             quotationDateEl.textContent = new Date().toLocaleDateString('zh-CN');
+             itemCountEl.textContent = quotationData.items.length;
+             projectInfo.style.display = 'block';
+        }
+        
+        function printQuotation() {
+            window.print();
+        }
+        
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const element = document.querySelector('.container');
+            
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                
+                let position = 0;
+                
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                const today = new Date();
+                const dateStr = today.getFullYear() + '-' + 
+                    String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(today.getDate()).padStart(2, '0');
+                
+                pdf.save(`太仓明邦陈列展示用品有限公司报价单_${dateStr}.pdf`);
+            }).catch(error => {
+                console.error('导出PDF失败:', error);
+                alert('导出PDF失败，请重试');
+            });
+        }
+        
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

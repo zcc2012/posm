@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>包装库管理 - 报价单管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .btn-action {
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        .modal-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            color: white;
+            padding: 40px 0;
+        }
+        .price-display {
+            font-weight: bold;
+            color: #8e44ad;
+        }
+        .category-badge {
+            background: #8e44ad;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .packaging-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>报价单管理系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers">
+                            <i class="fas fa-users me-1"></i>客户管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials">
+                            <i class="fas fa-boxes me-1"></i>材料库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes">
+                            <i class="fas fa-cogs me-1"></i>工艺库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotations">
+                            <i class="fas fa-file-invoice-dollar me-1"></i>报价单
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-box me-3"></i>包装库管理</h1>
+                    <p class="mb-0">管理报价单中的包装材料信息，包括纸箱、泡沫、包装袋等包装用品</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="category-badge">06 包装</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container my-4">
+        <!-- 操作按钮 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#packagingModal" onclick="openAddModal()">
+                    <i class="fas fa-plus me-2"></i>添加包装
+                </button>
+                <button class="btn btn-outline-secondary ms-2" onclick="loadPackaging()">
+                    <i class="fas fa-sync-alt me-1"></i>刷新
+                </button>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索包装名称或类型...">
+                    <button class="btn btn-outline-secondary" type="button" onclick="searchPackaging()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 包装列表 -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>图片</th>
+                            <th>包装名称</th>
+                            <th>包装类型</th>
+                            <th>规格尺寸</th>
+                            <th>单位</th>
+                            <th>单价</th>
+                            <th>库存</th>
+                            <th>供应商</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="packagingTableBody">
+                        <tr>
+                            <td colspan="10" class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>
+                                正在加载包装数据...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 空状态提示 -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-box fa-5x text-muted mb-3"></i>
+            <h4 class="text-muted">暂无包装数据</h4>
+            <p class="text-muted">点击上方"添加包装"按钮开始添加包装信息</p>
+        </div>
+    </div>
+
+    <!-- 包装信息模态框 -->
+    <div class="modal fade" id="packagingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-box me-2"></i>添加包装
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="packagingForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="packagingName" class="form-label">包装名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="packagingName" required placeholder="如：瓦楞纸箱、气泡膜等">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="packagingType" class="form-label">包装类型</label>
+                                <select class="form-select" id="packagingType">
+                                    <option value="">请选择包装类型</option>
+                                    <option value="纸箱">纸箱</option>
+                                    <option value="包装袋">包装袋</option>
+                                    <option value="泡沫材料">泡沫材料</option>
+                                    <option value="缓冲材料">缓冲材料</option>
+                                    <option value="封箱材料">封箱材料</option>
+                                    <option value="标签贴纸">标签贴纸</option>
+                                    <option value="托盘">托盘</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="packagingLength" class="form-label">长度 (mm)</label>
+                                <input type="number" class="form-control" id="packagingLength" step="1" min="0" placeholder="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="packagingWidth" class="form-label">宽度 (mm)</label>
+                                <input type="number" class="form-control" id="packagingWidth" step="1" min="0" placeholder="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="packagingHeight" class="form-label">高度 (mm)</label>
+                                <input type="number" class="form-control" id="packagingHeight" step="1" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="packagingMaterial" class="form-label">包装材质</label>
+                                <select class="form-select" id="packagingMaterial">
+                                    <option value="">请选择材质</option>
+                                    <option value="瓦楞纸">瓦楞纸</option>
+                                    <option value="牛皮纸">牛皮纸</option>
+                                    <option value="塑料">塑料</option>
+                                    <option value="泡沫">泡沫</option>
+                                    <option value="气泡膜">气泡膜</option>
+                                    <option value="珍珠棉">珍珠棉</option>
+                                    <option value="木材">木材</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="packagingThickness" class="form-label">厚度 (mm)</label>
+                                <input type="number" class="form-control" id="packagingThickness" step="0.1" min="0" placeholder="0.0">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="packagingUnit" class="form-label">单位</label>
+                                <select class="form-select" id="packagingUnit">
+                                    <option value="">请选择单位</option>
+                                    <option value="个">个</option>
+                                    <option value="套">套</option>
+                                    <option value="包">包</option>
+                                    <option value="箱">箱</option>
+                                    <option value="卷">卷</option>
+                                    <option value="张">张</option>
+                                    <option value="米">米</option>
+                                    <option value="平方米">平方米</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="packagingPrice" class="form-label">单价 (元)</label>
+                                <input type="number" class="form-control" id="packagingPrice" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="stockQuantity" class="form-label">库存数量</label>
+                                <input type="number" class="form-control" id="stockQuantity" step="1" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="packagingSupplier" class="form-label">供应商</label>
+                                <input type="text" class="form-control" id="packagingSupplier" placeholder="供应商名称">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="supplierContact" class="form-label">供应商联系方式</label>
+                                <input type="text" class="form-control" id="supplierContact" placeholder="电话或邮箱">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="loadCapacity" class="form-label">承重能力 (kg)</label>
+                                <input type="number" class="form-control" id="loadCapacity" step="0.1" min="0" placeholder="0.0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="minOrderQuantity" class="form-label">最小起订量</label>
+                                <input type="number" class="form-control" id="minOrderQuantity" step="1" min="1" placeholder="1">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="leadTime" class="form-label">交货周期 (天)</label>
+                                <input type="number" class="form-control" id="leadTime" step="1" min="0" placeholder="1">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="waterproof" class="form-label">防水性能</label>
+                                <select class="form-select" id="waterproof">
+                                    <option value="">请选择防水性能</option>
+                                    <option value="不防水">不防水</option>
+                                    <option value="防潮">防潮</option>
+                                    <option value="防水">防水</option>
+                                    <option value="完全防水">完全防水</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="recyclable" class="form-label">可回收性</label>
+                                <select class="form-select" id="recyclable">
+                                    <option value="">请选择可回收性</option>
+                                    <option value="可回收">可回收</option>
+                                    <option value="部分可回收">部分可回收</option>
+                                    <option value="不可回收">不可回收</option>
+                                    <option value="可降解">可降解</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="packagingDescription" class="form-label">备注说明</label>
+                            <textarea class="form-control" id="packagingDescription" rows="3" placeholder="可填写包装的详细描述、使用说明、注意事项等信息"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="savePackaging()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deletePackagingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除包装 "<span id="deletePackagingName"></span>" 吗？</p>
+                    <p class="text-muted small">此操作不可撤销，请谨慎操作。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDeletePackaging()">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let packaging = [];
+        let currentPackagingId = null;
+        let isEditMode = false;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPackaging();
+        });
+
+        // 加载包装数据
+        function loadPackaging() {
+            fetch('/api/packaging')
+            .then(response => response.json())
+            .then(data => {
+                packaging = data;
+                displayPackaging(data);
+            })
+            .catch(error => {
+                console.error('Error loading packaging:', error);
+                showAlert('加载包装数据失败', 'danger');
+            });
+        }
+
+        // 显示包装列表
+        function displayPackaging(packagingData) {
+            const tbody = document.getElementById('packagingTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (packagingData.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = packagingData.map(pkg => `
+                <tr>
+                    <td>${pkg.id}</td>
+                    <td>
+                        <div class="packaging-image bg-light d-flex align-items-center justify-content-center">
+                            <i class="fas fa-box text-muted"></i>
+                        </div>
+                    </td>
+                    <td><strong>${pkg.name}</strong></td>
+                    <td><span class="badge bg-info">${pkg.type || '-'}</span></td>
+                    <td>${formatDimensions(pkg.length, pkg.width, pkg.height)}</td>
+                    <td>${pkg.unit || '-'}</td>
+                    <td class="price-display">¥${(pkg.price || 0).toFixed(2)}</td>
+                    <td><span class="badge ${getStockClass(pkg.stock_quantity)}">${pkg.stock_quantity || 0}</span></td>
+                    <td>${pkg.supplier || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary btn-action" onclick="editPackaging(${pkg.id})" title="编辑">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-action" onclick="deletePackaging(${pkg.id}, '${pkg.name}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 格式化尺寸显示
+        function formatDimensions(length, width, height) {
+            const dims = [length, width, height].filter(d => d && d > 0);
+            return dims.length > 0 ? dims.join('×') + 'mm' : '-';
+        }
+
+        // 获取库存状态样式
+        function getStockClass(quantity) {
+            if (quantity > 100) return 'bg-success';
+            if (quantity > 20) return 'bg-warning';
+            return 'bg-danger';
+        }
+
+        // 搜索包装
+        function searchPackaging() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredPackaging = packaging.filter(pkg => 
+                pkg.name.toLowerCase().includes(searchTerm) ||
+                (pkg.type && pkg.type.toLowerCase().includes(searchTerm))
+            );
+            displayPackaging(filteredPackaging);
+        }
+
+        // 打开添加模态框
+        function openAddModal() {
+            isEditMode = false;
+            currentPackagingId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>添加包装';
+            document.getElementById('packagingForm').reset();
+        }
+
+        // 编辑包装
+        function editPackaging(id) {
+            const pkg = packaging.find(p => p.id === id);
+            if (!pkg) return;
+            
+            isEditMode = true;
+            currentPackagingId = id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑包装';
+            
+            // 填充表单数据
+            document.getElementById('packagingName').value = pkg.name || '';
+            document.getElementById('packagingType').value = pkg.type || '';
+            document.getElementById('packagingLength').value = pkg.length || '';
+            document.getElementById('packagingWidth').value = pkg.width || '';
+            document.getElementById('packagingHeight').value = pkg.height || '';
+            document.getElementById('packagingMaterial').value = pkg.material || '';
+            document.getElementById('packagingThickness').value = pkg.thickness || '';
+            document.getElementById('packagingUnit').value = pkg.unit || '';
+            document.getElementById('packagingPrice').value = pkg.price || '';
+            document.getElementById('stockQuantity').value = pkg.stock_quantity || '';
+            document.getElementById('packagingSupplier').value = pkg.supplier || '';
+            document.getElementById('supplierContact').value = pkg.supplier_contact || '';
+            document.getElementById('loadCapacity').value = pkg.load_capacity || '';
+            document.getElementById('minOrderQuantity').value = pkg.min_order_quantity || '';
+            document.getElementById('leadTime').value = pkg.lead_time || '';
+            document.getElementById('waterproof').value = pkg.waterproof || '';
+            document.getElementById('recyclable').value = pkg.recyclable || '';
+            document.getElementById('packagingDescription').value = pkg.description || '';
+            
+            new bootstrap.Modal(document.getElementById('packagingModal')).show();
+        }
+
+        // 保存包装
+        function savePackaging() {
+            const form = document.getElementById('packagingForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const packagingData = {
+                name: document.getElementById('packagingName').value,
+                type: document.getElementById('packagingType').value,
+                length: parseFloat(document.getElementById('packagingLength').value) || 0,
+                width: parseFloat(document.getElementById('packagingWidth').value) || 0,
+                height: parseFloat(document.getElementById('packagingHeight').value) || 0,
+                material: document.getElementById('packagingMaterial').value,
+                thickness: parseFloat(document.getElementById('packagingThickness').value) || 0,
+                unit: document.getElementById('packagingUnit').value,
+                price: parseFloat(document.getElementById('packagingPrice').value) || 0,
+                stock_quantity: parseInt(document.getElementById('stockQuantity').value) || 0,
+                supplier: document.getElementById('packagingSupplier').value,
+                supplier_contact: document.getElementById('supplierContact').value,
+                load_capacity: parseFloat(document.getElementById('loadCapacity').value) || 0,
+                min_order_quantity: parseInt(document.getElementById('minOrderQuantity').value) || 1,
+                lead_time: parseInt(document.getElementById('leadTime').value) || 0,
+                waterproof: document.getElementById('waterproof').value,
+                recyclable: document.getElementById('recyclable').value,
+                description: document.getElementById('packagingDescription').value,
+                category: '06'
+            };
+            
+            const url = isEditMode ? `/api/packaging/${currentPackagingId}` : '/api/packaging';
+            const method = isEditMode ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(packagingData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('packagingModal')).hide();
+                    loadPackaging();
+                    showAlert(isEditMode ? '包装更新成功' : '包装添加成功', 'success');
+                } else {
+                    showAlert('操作失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('操作失败，请重试', 'danger');
+            });
+        }
+
+        // 删除包装
+        function deletePackaging(id, name) {
+            currentPackagingId = id;
+            document.getElementById('deletePackagingName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deletePackagingModal')).show();
+        }
+
+        // 确认删除包装
+        function confirmDeletePackaging() {
+            fetch(`/api/packaging/${currentPackagingId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('deletePackagingModal')).hide();
+                    loadPackaging();
+                    showAlert('包装删除成功', 'success');
+                } else {
+                    showAlert('删除失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('删除失败，请重试', 'danger');
+            });
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        // 搜索框回车事件
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchPackaging();
+            }
+        });
+    </script>
+</body>
+</html>

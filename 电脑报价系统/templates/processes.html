@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工艺库管理 - 报价系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .btn-action {
+            margin: 0 2px;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        }
+        .base-process-box {
+            background-color: #f8f9fa;
+        }
+        .base-process-option {
+            align-items: center;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            min-height: 38px;
+            padding: 6px 8px;
+        }
+        .base-process-option .form-check {
+            margin-bottom: 0;
+            min-width: 0;
+        }
+        .base-process-option .form-check-label {
+            word-break: break-all;
+        }
+        .base-process-delete {
+            flex: 0 0 auto;
+            margin-left: 8px;
+            padding: 2px 7px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>报价系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" title="切换导航菜单">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers"><i class="fas fa-users me-1"></i>客户管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials"><i class="fas fa-boxes me-1"></i>材料库</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/processes"><i class="fas fa-cogs me-1"></i>工艺库</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pricing_standards"><i class="fas fa-ruler me-1"></i>判定标准</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotations"><i class="fas fa-file-invoice me-1"></i>报价管理</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0">
+                        <i class="fas fa-cogs me-3"></i>工艺库管理
+                    </h1>
+                    <p class="mb-0 mt-2 opacity-75">管理各种工艺类型，用于判定标准的种类组合</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#processModal" onclick="openAddProcessModal()">
+                        <i class="fas fa-plus me-2"></i>添加工艺
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container">
+        <!-- 搜索和操作栏 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索工艺名称..." onkeyup="searchProcesses()">
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <button class="btn btn-outline-primary" onclick="loadProcesses()">
+                    <i class="fas fa-sync-alt me-1"></i>刷新
+                </button>
+            </div>
+        </div>
+
+        <!-- 工艺列表 -->
+        <div class="card shadow">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 6%">ID</th>
+                                <th style="width: 20%">工艺名称</th>
+                                <th style="width: 25%">基础工艺组合</th>
+                                <th style="width: 30%">工艺描述</th>
+                                <th style="width: 10%">创建时间</th>
+                                <th style="width: 9%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="processTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>
+                                    正在加载工艺数据...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑工艺模态框 -->
+    <div class="modal fade" id="processModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="processModalTitle">
+                        <i class="fas fa-plus me-2"></i>添加工艺
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="processForm">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">选择基础工艺 <span class="text-danger">*</span></label>
+                                <div class="border rounded p-3 base-process-box">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="newBaseProcessName" placeholder="新增基础工艺，如：烫银">
+                                        <button class="btn btn-outline-primary" type="button" onclick="addBaseProcessOption()">
+                                            <i class="fas fa-plus me-1"></i>新增
+                                        </button>
+                                    </div>
+                                    <div class="row g-2" id="baseProcesses">
+                                        <div class="col-12 text-muted small">正在加载基础工艺...</div>
+                                    </div>
+                                    <div class="form-text mt-2">基础工艺选项可以自行新增；未被组合工艺使用的选项可以删除。</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="processName" class="form-label">组合工艺名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="processName" required placeholder="将根据选择的基础工艺自动生成" readonly style="background-color: #e9ecef;">
+                                <div class="form-text">工艺名称将根据您选择的基础工艺自动生成，如：印刷+模切+光油</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="processDescription" class="form-label">工艺描述</label>
+                                <textarea class="form-control" id="processDescription" rows="3" placeholder="详细描述工艺流程和要求..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveProcess()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteProcessModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除工艺 "<span id="deleteProcessName"></span>" 吗？</p>
+                    <p class="text-muted small">此操作不可撤销，请谨慎操作。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteProcess()">
+                        <i class="fas fa-trash me-1"></i>确认删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentProcessId = null;
+        let deleteProcessId = null;
+        let processes = [];
+        let baseProcessOptions = [];
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBaseProcessOptions().then(loadProcesses);
+        });
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function loadBaseProcessOptions() {
+            return fetch('/api/base_processes')
+                .then(response => response.json())
+                .then(data => {
+                    baseProcessOptions = data;
+                    const selectedNames = Array.from(document.querySelectorAll('#baseProcesses input[type="checkbox"]:checked')).map(cb => cb.value);
+                    renderBaseProcessOptions(selectedNames);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('加载基础工艺失败', 'danger');
+                });
+        }
+
+        function isBaseProcessUsed(name) {
+            return processes.some(process => (process.base_processes || []).includes(name));
+        }
+
+        function renderBaseProcessOptions(selectedNames = []) {
+            const container = document.getElementById('baseProcesses');
+            if (!container) return;
+
+            if (baseProcessOptions.length === 0) {
+                container.innerHTML = '<div class="col-12 text-muted small">暂无基础工艺，请先新增</div>';
+                updateProcessName();
+                return;
+            }
+
+            container.innerHTML = baseProcessOptions.map(option => {
+                const checkboxId = `base_process_${option.id}`;
+                const checked = selectedNames.includes(option.name) ? 'checked' : '';
+                const used = isBaseProcessUsed(option.name);
+                const deleteTitle = used ? '已有组合工艺使用，先编辑或删除相关工艺' : '删除基础工艺';
+                return `
+                    <div class="col-md-4">
+                        <div class="base-process-option">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="${escapeHtml(option.name)}" id="${checkboxId}" onchange="updateProcessName()" ${checked}>
+                                <label class="form-check-label" for="${checkboxId}">${escapeHtml(option.name)}</label>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger base-process-delete" onclick="deleteBaseProcessOption(${option.id})" title="${deleteTitle}" ${used ? 'disabled' : ''}>
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            updateProcessName();
+        }
+
+        function addBaseProcessOption() {
+            const input = document.getElementById('newBaseProcessName');
+            const name = input.value.trim();
+            if (!name) {
+                showAlert('请输入基础工艺名称', 'warning');
+                input.focus();
+                return;
+            }
+
+            fetch('/api/base_processes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || '新增基础工艺失败');
+                return data;
+            })
+            .then(data => {
+                showAlert(data.message, 'success');
+                input.value = '';
+                return loadBaseProcessOptions();
+            })
+            .catch(error => {
+                showAlert(error.message, 'warning');
+            });
+        }
+
+        function deleteBaseProcessOption(optionId) {
+            const option = baseProcessOptions.find(item => item.id === optionId);
+            if (!option) return;
+            if (!confirm(`确定删除基础工艺“${option.name}”吗？`)) return;
+
+            fetch(`/api/base_processes/${optionId}`, { method: 'DELETE' })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || '删除基础工艺失败');
+                return data;
+            })
+            .then(data => {
+                showAlert(data.message, 'success');
+                return loadBaseProcessOptions();
+            })
+            .catch(error => {
+                showAlert(error.message, 'warning');
+            });
+        }
+
+        // 加载工艺列表
+        function loadProcesses() {
+            fetch('/api/processes')
+                .then(response => response.json())
+                .then(data => {
+                    processes = data;
+                    displayProcesses(data);
+                    const selectedNames = Array.from(document.querySelectorAll('#baseProcesses input[type="checkbox"]:checked')).map(cb => cb.value);
+                    renderBaseProcessOptions(selectedNames);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('加载工艺数据失败', 'danger');
+                });
+        }
+
+        // 显示工艺列表
+        function displayProcesses(processes) {
+            const tbody = document.getElementById('processTableBody');
+            
+            if (processes.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                    暂无工艺数据，点击上方"添加工艺"按钮开始添加
+                                </td>
+                            </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = processes.map(process => {
+                const baseProcesses = process.base_processes || [];
+                const baseProcessesDisplay = baseProcesses.length > 0 
+                    ? baseProcesses.map(bp => `<span class="badge bg-secondary me-1">${escapeHtml(bp)}</span>`).join('')
+                    : '<span class="text-muted">-</span>';
+                
+                return `
+                    <tr>
+                        <td>${process.id}</td>
+                        <td><strong>${escapeHtml(process.name)}</strong></td>
+                        <td>${baseProcessesDisplay}</td>
+                        <td>${escapeHtml(process.description || '-')}</td>
+                        <td>${new Date(process.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary btn-action" onclick="editProcess(${process.id})" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteProcess(${process.id})" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 搜索工艺
+        function searchProcesses() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredProcesses = processes.filter(process => 
+                process.name.toLowerCase().includes(searchTerm) ||
+                (process.description && process.description.toLowerCase().includes(searchTerm))
+            );
+            displayProcesses(filteredProcesses);
+        }
+
+        // 更新工艺名称
+        function updateProcessName() {
+            const checkboxes = document.querySelectorAll('#baseProcesses input[type="checkbox"]:checked');
+            const selectedProcesses = Array.from(checkboxes).map(cb => cb.value);
+            
+            const processNameInput = document.getElementById('processName');
+            if (selectedProcesses.length > 0) {
+                processNameInput.value = selectedProcesses.join('+');
+            } else {
+                processNameInput.value = '';
+            }
+        }
+
+        // 打开添加工艺模态框
+        function openAddProcessModal() {
+            currentProcessId = null;
+            document.getElementById('processModalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>添加工艺';
+            document.getElementById('processForm').reset();
+            renderBaseProcessOptions();
+        }
+
+        // 编辑工艺
+        function editProcess(processId) {
+            currentProcessId = processId;
+            const process = processes.find(p => p.id === processId);
+            
+            document.getElementById('processModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑工艺';
+            document.getElementById('processName').value = process.name;
+            document.getElementById('processDescription').value = process.description || '';
+
+            let selectedNames = [];
+            if (process.base_processes && process.base_processes.length > 0) {
+                selectedNames = process.base_processes;
+            } else {
+                // 兼容旧数据：根据工艺名称设置复选框状态
+                if (process.name && process.name.includes('+')) {
+                    selectedNames = process.name.split('+').map(component => component.trim()).filter(Boolean);
+                } else {
+                    selectedNames = [process.name];
+                }
+            }
+            renderBaseProcessOptions(selectedNames);
+            
+            new bootstrap.Modal(document.getElementById('processModal')).show();
+        }
+
+        // 保存工艺
+        function saveProcess() {
+            // 检查是否选择了基础工艺
+            const selectedProcesses = document.querySelectorAll('#baseProcesses input[type="checkbox"]:checked');
+            if (selectedProcesses.length === 0) {
+                showAlert('请至少选择一个基础工艺', 'warning');
+                return;
+            }
+
+            const form = document.getElementById('processForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // 获取选中的基础工艺
+            const baseProcesses = Array.from(selectedProcesses).map(cb => cb.value);
+            
+            const processData = {
+                name: document.getElementById('processName').value,
+                description: document.getElementById('processDescription').value,
+                base_processes: baseProcesses // 添加基础工艺信息
+            };
+
+            const url = currentProcessId ? `/api/processes/${currentProcessId}` : '/api/processes';
+            const method = currentProcessId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(processData)
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || '保存工艺失败');
+                return data;
+            })
+            .then(data => {
+                showAlert(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('processModal')).hide();
+                loadProcesses();
+                loadBaseProcessOptions();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert(error.message, 'danger');
+            });
+        }
+
+        // 删除工艺
+        function deleteProcess(processId) {
+            const process = processes.find(item => item.id === processId);
+            deleteProcessId = processId;
+            document.getElementById('deleteProcessName').textContent = process ? process.name : '';
+            new bootstrap.Modal(document.getElementById('deleteProcessModal')).show();
+        }
+
+        // 确认删除工艺
+        function confirmDeleteProcess() {
+            fetch(`/api/processes/${deleteProcessId}`, {
+                method: 'DELETE'
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || '删除工艺失败');
+                return data;
+            })
+            .then(data => {
+                showAlert(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('deleteProcessModal')).hide();
+                loadProcesses();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert(error.message, 'danger');
+            });
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加工费用库管理 - 报价单管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .btn-action {
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        .modal-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 40px 0;
+        }
+        .price-display {
+            font-weight: bold;
+            color: #f39c12;
+        }
+        .category-badge {
+            background: #f39c12;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .process-complexity {
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>报价单管理系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers">
+                            <i class="fas fa-users me-1"></i>客户管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials">
+                            <i class="fas fa-boxes me-1"></i>材料库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes">
+                            <i class="fas fa-cogs me-1"></i>工艺库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotations">
+                            <i class="fas fa-file-invoice-dollar me-1"></i>报价单
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-industry me-3"></i>加工费用库管理</h1>
+                    <p class="mb-0">管理报价单中的加工费用信息，包括切割、焊接、组装等各类加工工艺费用</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="category-badge">04 加工费用合计</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container my-4">
+        <!-- 操作按钮 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#processingModal" onclick="openAddModal()">
+                    <i class="fas fa-plus me-2"></i>添加加工费用
+                </button>
+                <button class="btn btn-outline-secondary ms-2" onclick="loadProcessingCosts()">
+                    <i class="fas fa-sync-alt me-1"></i>刷新
+                </button>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索加工名称或类型...">
+                    <button class="btn btn-outline-secondary" type="button" onclick="searchProcessingCosts()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加工费用列表 -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>加工名称</th>
+                            <th>加工类型</th>
+                            <th>复杂度</th>
+                            <th>单位</th>
+                            <th>基础单价</th>
+                            <th>时间单价</th>
+                            <th>设备要求</th>
+                            <th>加工时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="processingTableBody">
+                        <tr>
+                            <td colspan="10" class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>
+                                正在加载加工费用数据...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 空状态提示 -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-industry fa-5x text-muted mb-3"></i>
+            <h4 class="text-muted">暂无加工费用数据</h4>
+            <p class="text-muted">点击上方"添加加工费用"按钮开始添加加工费用信息</p>
+        </div>
+    </div>
+
+    <!-- 加工费用信息模态框 -->
+    <div class="modal fade" id="processingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-industry me-2"></i>添加加工费用
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="processingForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="processingName" class="form-label">加工名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="processingName" required placeholder="如：激光切割、数控加工等">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="processingType" class="form-label">加工类型</label>
+                                <select class="form-select" id="processingType">
+                                    <option value="">请选择加工类型</option>
+                                    <option value="切割加工">切割加工</option>
+                                    <option value="焊接加工">焊接加工</option>
+                                    <option value="弯曲加工">弯曲加工</option>
+                                    <option value="冲压加工">冲压加工</option>
+                                    <option value="数控加工">数控加工</option>
+                                    <option value="组装加工">组装加工</option>
+                                    <option value="表面处理">表面处理</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="complexity" class="form-label">复杂度等级</label>
+                                <select class="form-select" id="complexity">
+                                    <option value="">请选择复杂度</option>
+                                    <option value="简单">简单</option>
+                                    <option value="中等">中等</option>
+                                    <option value="复杂">复杂</option>
+                                    <option value="精密">精密</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="processingUnit" class="form-label">计费单位</label>
+                                <select class="form-select" id="processingUnit">
+                                    <option value="">请选择单位</option>
+                                    <option value="件">件</option>
+                                    <option value="米">米</option>
+                                    <option value="平方米">平方米</option>
+                                    <option value="小时">小时</option>
+                                    <option value="套">套</option>
+                                    <option value="次">次</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="processingTime" class="form-label">标准加工时间 (小时)</label>
+                                <input type="number" class="form-control" id="processingTime" step="0.1" min="0" placeholder="0.0">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="basePrice" class="form-label">基础单价 (元)</label>
+                                <input type="number" class="form-control" id="basePrice" step="0.01" min="0" placeholder="0.00">
+                                <div class="form-text">基础加工费用</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="hourlyRate" class="form-label">时间单价 (元/小时)</label>
+                                <input type="number" class="form-control" id="hourlyRate" step="0.01" min="0" placeholder="0.00">
+                                <div class="form-text">按时间计费的单价</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="setupCost" class="form-label">设备调试费 (元)</label>
+                                <input type="number" class="form-control" id="setupCost" step="0.01" min="0" placeholder="0.00">
+                                <div class="form-text">一次性设备调试费用</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="equipmentRequired" class="form-label">设备要求</label>
+                                <input type="text" class="form-control" id="equipmentRequired" placeholder="如：激光切割机、数控铣床等">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="skillLevel" class="form-label">技能要求</label>
+                                <select class="form-select" id="skillLevel">
+                                    <option value="">请选择技能等级</option>
+                                    <option value="初级">初级</option>
+                                    <option value="中级">中级</option>
+                                    <option value="高级">高级</option>
+                                    <option value="专家">专家</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="materialWaste" class="form-label">材料损耗率 (%)</label>
+                                <input type="number" class="form-control" id="materialWaste" step="0.1" min="0" max="100" placeholder="0.0">
+                                <div class="form-text">加工过程中的材料损耗</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="qualityLevel" class="form-label">质量等级</label>
+                                <select class="form-select" id="qualityLevel">
+                                    <option value="">请选择质量等级</option>
+                                    <option value="标准">标准</option>
+                                    <option value="精密">精密</option>
+                                    <option value="超精密">超精密</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="minQuantity" class="form-label">最小起订量</label>
+                                <input type="number" class="form-control" id="minQuantity" step="1" min="0" placeholder="1">
+                                <div class="form-text">最小加工数量</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="processingDescription" class="form-label">备注说明</label>
+                            <textarea class="form-control" id="processingDescription" rows="3" placeholder="可填写加工的详细描述、技术要求、注意事项等信息"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="saveProcessingCost()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteProcessingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除加工费用 "<span id="deleteProcessingName"></span>" 吗？</p>
+                    <p class="text-muted small">此操作不可撤销，请谨慎操作。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteProcessingCost()">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let processingCosts = [];
+        let currentProcessingId = null;
+        let isEditMode = false;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProcessingCosts();
+        });
+
+        // 加载加工费用数据
+        function loadProcessingCosts() {
+            fetch('/api/processing_costs')
+            .then(response => response.json())
+            .then(data => {
+                processingCosts = data;
+                displayProcessingCosts(data);
+            })
+            .catch(error => {
+                console.error('Error loading processing costs:', error);
+                showAlert('加载加工费用数据失败', 'danger');
+            });
+        }
+
+        // 显示加工费用列表
+        function displayProcessingCosts(processingData) {
+            const tbody = document.getElementById('processingTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (processingData.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = processingData.map(processing => `
+                <tr>
+                    <td>${processing.id}</td>
+                    <td><strong>${processing.name}</strong></td>
+                    <td><span class="badge bg-secondary">${processing.type || '-'}</span></td>
+                    <td><span class="badge ${getComplexityClass(processing.complexity)} process-complexity">${processing.complexity || '-'}</span></td>
+                    <td>${processing.unit || '-'}</td>
+                    <td class="price-display">¥${(processing.base_price || 0).toFixed(2)}</td>
+                    <td class="price-display">¥${(processing.hourly_rate || 0).toFixed(2)}</td>
+                    <td>${processing.equipment_required || '-'}</td>
+                    <td>${processing.processing_time || 0}小时</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary btn-action" onclick="editProcessingCost(${processing.id})" title="编辑">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteProcessingCost(${processing.id}, '${processing.name}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 获取复杂度样式
+        function getComplexityClass(complexity) {
+            switch(complexity) {
+                case '简单': return 'bg-success';
+                case '中等': return 'bg-info';
+                case '复杂': return 'bg-warning';
+                case '精密': return 'bg-danger';
+                default: return 'bg-secondary';
+            }
+        }
+
+        // 搜索加工费用
+        function searchProcessingCosts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredProcessing = processingCosts.filter(processing => 
+                processing.name.toLowerCase().includes(searchTerm) ||
+                (processing.type && processing.type.toLowerCase().includes(searchTerm))
+            );
+            displayProcessingCosts(filteredProcessing);
+        }
+
+        // 打开添加模态框
+        function openAddModal() {
+            isEditMode = false;
+            currentProcessingId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>添加加工费用';
+            document.getElementById('processingForm').reset();
+        }
+
+        // 编辑加工费用
+        function editProcessingCost(id) {
+            const processing = processingCosts.find(p => p.id === id);
+            if (!processing) return;
+            
+            isEditMode = true;
+            currentProcessingId = id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑加工费用';
+            
+            // 填充表单数据
+            document.getElementById('processingName').value = processing.name || '';
+            document.getElementById('processingType').value = processing.type || '';
+            document.getElementById('complexity').value = processing.complexity || '';
+            document.getElementById('processingUnit').value = processing.unit || '';
+            document.getElementById('processingTime').value = processing.processing_time || '';
+            document.getElementById('basePrice').value = processing.base_price || '';
+            document.getElementById('hourlyRate').value = processing.hourly_rate || '';
+            document.getElementById('setupCost').value = processing.setup_cost || '';
+            document.getElementById('equipmentRequired').value = processing.equipment_required || '';
+            document.getElementById('skillLevel').value = processing.skill_level || '';
+            document.getElementById('materialWaste').value = processing.material_waste || '';
+            document.getElementById('qualityLevel').value = processing.quality_level || '';
+            document.getElementById('minQuantity').value = processing.min_quantity || '';
+            document.getElementById('processingDescription').value = processing.description || '';
+            
+            new bootstrap.Modal(document.getElementById('processingModal')).show();
+        }
+
+        // 保存加工费用
+        function saveProcessingCost() {
+            const form = document.getElementById('processingForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const processingData = {
+                name: document.getElementById('processingName').value,
+                type: document.getElementById('processingType').value,
+                complexity: document.getElementById('complexity').value,
+                unit: document.getElementById('processingUnit').value,
+                processing_time: parseFloat(document.getElementById('processingTime').value) || 0,
+                base_price: parseFloat(document.getElementById('basePrice').value) || 0,
+                hourly_rate: parseFloat(document.getElementById('hourlyRate').value) || 0,
+                setup_cost: parseFloat(document.getElementById('setupCost').value) || 0,
+                equipment_required: document.getElementById('equipmentRequired').value,
+                skill_level: document.getElementById('skillLevel').value,
+                material_waste: parseFloat(document.getElementById('materialWaste').value) || 0,
+                quality_level: document.getElementById('qualityLevel').value,
+                min_quantity: parseInt(document.getElementById('minQuantity').value) || 1,
+                description: document.getElementById('processingDescription').value,
+                category: '04'
+            };
+            
+            const url = isEditMode ? `/api/processing_costs/${currentProcessingId}` : '/api/processing_costs';
+            const method = isEditMode ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(processingData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('processingModal')).hide();
+                    loadProcessingCosts();
+                    showAlert(isEditMode ? '加工费用更新成功' : '加工费用添加成功', 'success');
+                } else {
+                    showAlert('操作失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('操作失败，请重试', 'danger');
+            });
+        }
+
+        // 删除加工费用
+        function deleteProcessingCost(id, name) {
+            currentProcessingId = id;
+            document.getElementById('deleteProcessingName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deleteProcessingModal')).show();
+        }
+
+        // 确认删除加工费用
+        function confirmDeleteProcessingCost() {
+            fetch(`/api/processing_costs/${currentProcessingId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('deleteProcessingModal')).hide();
+                    loadProcessingCosts();
+                    showAlert('加工费用删除成功', 'success');
+                } else {
+                    showAlert('删除失败：' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('删除失败，请重试', 'danger');
+            });
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        // 搜索框回车事件
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProcessingCosts();
+            }
+        });
+    </script>
+</body>
+</html>

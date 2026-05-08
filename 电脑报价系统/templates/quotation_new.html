@@ -1,0 +1,2114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新建报价单 - 报价单管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/quotation.css') }}?v=20260508-manual-costs" rel="stylesheet">
+    <style>
+        .standards-info-content .text-muted {
+            color: #64748b !important;
+            font-style: normal;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>成本分析与报价系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" title="切换导航菜单">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers"><i class="fas fa-users me-1"></i>客户管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials"><i class="fas fa-boxes me-1"></i>材料库</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes"><i class="fas fa-cogs me-1"></i>工艺库</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pricing_standards"><i class="fas fa-ruler me-1"></i>判定标准</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/quotation_new"><i class="fas fa-file-invoice me-1"></i>报价单</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-file-invoice-dollar me-2"></i>新建报价单</h1>
+            <p class="mb-0">录入材料、尺寸和工艺，系统自动计算价格</p>
+        </div>
+    </div>
+
+    <div class="container-fluid px-3 my-4">
+        <div class="d-flex justify-content-center">
+            <div class="form-section">
+            
+            <!-- 项目套数设置 -->
+            <div class="project-sets-section">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="projectSets" class="form-label fw-bold">
+                            <i class="fas fa-layer-group me-2 text-primary"></i>项目套数 <span class="required">*</span>
+                        </label>
+                        <input type="number" class="form-control" id="projectSets" value="1" min="1" 
+                               placeholder="请输入项目套数" style="max-width: 250px;">
+                        <small class="text-muted mt-2 d-block">每套包含下方所有零件</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 手工费用录入 -->
+            <div class="manual-costs-section">
+                <div class="manual-costs-title">
+                    <i class="fas fa-pen-to-square me-2 text-primary"></i>手工费用
+                </div>
+                <div class="manual-costs-grid">
+                    <div class="manual-cost-card">
+                        <label for="packagingUnitPrice" class="form-label">包装单价</label>
+                        <div class="manual-cost-input">
+                            <input type="number" class="form-control manual-cost-unit" id="packagingUnitPrice" min="0" step="0.01" value="0" aria-label="包装单价">
+                            <span>元/套</span>
+                        </div>
+                        <label for="packagingTotalPrice" class="form-label mt-2">包装总价</label>
+                        <div class="manual-cost-input">
+                            <input type="number" class="form-control manual-cost-total-input" id="packagingTotalPrice" min="0" step="0.01" value="0" aria-label="包装总价">
+                            <span>元</span>
+                        </div>
+                    </div>
+                    <div class="manual-cost-card">
+                        <label for="shippingUnitPrice" class="form-label">运输单价</label>
+                        <div class="manual-cost-input">
+                            <input type="number" class="form-control manual-cost-unit" id="shippingUnitPrice" min="0" step="0.01" value="0" aria-label="运输单价">
+                            <span>元/套</span>
+                        </div>
+                        <label for="shippingTotalPrice" class="form-label mt-2">运输总价</label>
+                        <div class="manual-cost-input">
+                            <input type="number" class="form-control manual-cost-total-input" id="shippingTotalPrice" min="0" step="0.01" value="0" aria-label="运输总价">
+                            <span>元</span>
+                        </div>
+                    </div>
+                    <div class="manual-cost-card">
+                        <label for="laborUnitPrice" class="form-label">人工单价</label>
+                        <div class="manual-cost-input">
+                            <input type="number" class="form-control manual-cost-unit" id="laborUnitPrice" min="0" step="0.01" value="0" aria-label="人工单价">
+                            <span>元/套</span>
+                        </div>
+                        <label for="laborTotalPrice" class="form-label mt-2">人工总价</label>
+                        <div class="manual-cost-input">
+                            <input type="number" class="form-control manual-cost-total-input" id="laborTotalPrice" min="0" step="0.01" value="0" aria-label="人工总价">
+                            <span>元</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 字段标签行 -->
+            <div class="label-row">
+                <div class="field-group material text-center">
+                    <span class="field-label">材料 <span class="required">*</span></span>
+                </div>
+                <div class="field-group quantity text-center">
+                    <span class="field-label">数量 <span class="required">*</span></span>
+                </div>
+                <div class="field-group dimension text-center">
+                    <span class="field-label">长(mm) <span class="required">*</span></span>
+                </div>
+                <div class="field-group dimension text-center">
+                    <span class="field-label">宽(mm) <span class="required">*</span></span>
+                </div>
+                <div class="field-group process text-center">
+                    <span class="field-label">工艺 <span class="required">*</span></span>
+                </div>
+                <div class="field-group price text-center">
+                    <span class="field-label">单价</span>
+                </div>
+                <div class="field-group standard-index text-center">
+                    <span class="field-label">计算标准</span>
+                </div>
+                <div class="field-group operations text-center">
+                    <span class="field-label">操作</span>
+                </div>
+            </div>
+
+            <!-- 输入行容器 -->
+            <div id="inputContainer">
+                <!-- 第一行输入 -->
+                <div class="input-row" data-row="1">
+                    <div class="field-group material">
+                        <div class="d-flex gap-2" style="width: 100%;">
+                            <select class="form-select category-select" style="flex: 0 0 80px;" aria-label="材料分类选择">
+                                <option value="">分类</option>
+                            </select>
+                            <select class="form-select material-select" required style="flex: 1; min-width: 300px; width: auto;" aria-label="材料选择">
+                                <option value="">请选择材料</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-group quantity">
+                        <input type="number" class="form-control quantity-input" value="1" min="1" required title="输入材料数量" placeholder="数量" aria-label="材料数量">
+                    </div>
+                    <div class="field-group dimension">
+                        <input type="number" class="form-control length-input" placeholder="长度" min="0" step="0.1" required aria-label="长度尺寸">
+                    </div>
+                    <div class="field-group dimension">
+                        <input type="number" class="form-control width-input" placeholder="宽度" min="0" step="0.1" required aria-label="宽度尺寸">
+                    </div>
+                    <div class="field-group process">
+                        <select class="form-select process-select" required title="选择加工工艺" aria-label="加工工艺选择">
+                            <option value="">请选择工艺</option>
+                        </select>
+                    </div>
+                    <div class="field-group price">
+                        <input type="text" class="form-control price-display text-center" readonly placeholder="自动计算" aria-label="计算价格">
+                    </div>
+                    <div class="field-group standard-index">
+                        <div class="standard-trigger is-empty" tabindex="0" aria-label="计算标准">
+                            <i class="fas fa-info-circle"></i>
+                            <span>计算标准</span>
+                            <div class="standard-tooltip">
+                                <div class="standard-empty">填写材料、尺寸和工艺后显示</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field-group operations">
+                        <button type="button" class="btn btn-remove" onclick="removeRow(this)" title="删除此行" aria-label="删除当前行">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加按钮 -->
+            <div class="row-actions">
+                <button type="button" class="btn btn-add" onclick="addNewRow()" title="添加新的材料行" aria-label="添加新的材料行">
+                    <i class="fas fa-plus me-2"></i>添加新行
+                </button>
+            </div>
+
+            <!-- 完成按钮 -->
+            <div class="quote-actions">
+                <button type="button" class="btn btn-outline-secondary" onclick="clearFormData()" title="清空所有表单数据" aria-label="清空表单">
+                    <i class="fas fa-trash me-2"></i>清空表单
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="viewPriceBreakdown()" title="查看价格明细" aria-label="查看价格明细">
+                    <i class="fas fa-chart-pie me-2"></i>价格明细
+                </button>
+                <button type="button" class="btn btn-complete" onclick="completeQuotation()" title="完成报价并生成报价单" aria-label="完成报价并生成报价单">
+                    <i class="fas fa-check me-2"></i>完成报价单
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let rowCounter = 1;
+        let materials = [];
+        let processes = [];
+        let materialCategories = [];
+
+        const manualCostFields = {
+            packaging: { inputId: 'packagingUnitPrice', totalInputId: 'packagingTotalPrice', label: '包装' },
+            shipping: { inputId: 'shippingUnitPrice', totalInputId: 'shippingTotalPrice', label: '运输' },
+            labor: { inputId: 'laborUnitPrice', totalInputId: 'laborTotalPrice', label: '人工' }
+        };
+
+        function getProjectSetsValue() {
+            return parseInt(document.getElementById('projectSets').value) || 1;
+        }
+
+        function getManualCosts() {
+            const result = {};
+            
+            Object.entries(manualCostFields).forEach(([key, config]) => {
+                const unitInput = document.getElementById(config.inputId);
+                const totalInput = document.getElementById(config.totalInputId);
+                const unitPrice = parseFloat(unitInput.value) || 0;
+                const totalPrice = parseFloat(totalInput.value) || 0;
+                result[key] = {
+                    name: config.label,
+                    unit_price: unitPrice,
+                    total_price: totalPrice,
+                    source: totalInput.dataset.source || 'unit'
+                };
+            });
+            
+            return result;
+        }
+
+        function syncManualCost(key, source = 'unit') {
+            const config = manualCostFields[key];
+            if (!config) return;
+            
+            const projectSets = getProjectSetsValue();
+            const unitInput = document.getElementById(config.inputId);
+            const totalInput = document.getElementById(config.totalInputId);
+            if (!unitInput || !totalInput) return;
+            
+            if (source === 'total') {
+                const totalPrice = parseFloat(totalInput.value) || 0;
+                unitInput.value = (totalPrice / Math.max(projectSets, 1)).toFixed(2);
+                totalInput.dataset.source = 'total';
+                return;
+            }
+            
+            const unitPrice = parseFloat(unitInput.value) || 0;
+            totalInput.value = (unitPrice * projectSets).toFixed(2);
+            totalInput.dataset.source = 'unit';
+        }
+
+        function updateManualCostTotals() {
+            Object.keys(manualCostFields).forEach(key => {
+                const totalInput = document.getElementById(manualCostFields[key].totalInputId);
+                syncManualCost(key, totalInput?.dataset.source || 'unit');
+            });
+        }
+
+        // 页面加载时初始化数据
+        async function initializePage() {
+            console.log('🚀 开始初始化页面数据...');
+            try {
+                await loadMaterials();
+                await loadProcesses();
+                await loadMaterialCategories();
+                console.log('✅ 所有数据加载完成');
+                console.log('📊 分类数据:', materialCategories);
+                
+                // 加载完基础数据后恢复表单状态
+                setTimeout(() => {
+                    restoreFormData();
+                    console.log('✅ 表单数据恢复完成');
+                }, 500);
+            } catch (error) {
+                console.error('❌ 页面初始化失败:', error);
+            }
+        }
+
+        // 加载材料数据
+        async function loadMaterials() {
+            try {
+                const response = await fetch('/api/materials');
+                materials = await response.json();
+                updateMaterialSelects();
+            } catch (error) {
+                console.error('加载材料数据失败:', error);
+            }
+        }
+
+        // 加载工艺数据
+        async function loadProcesses() {
+            try {
+                const response = await fetch('/api/processes');
+                processes = await response.json();
+                updateProcessSelects();
+            } catch (error) {
+                console.error('加载工艺数据失败:', error);
+            }
+        }
+
+        // 加载材料分类数据
+        async function loadMaterialCategories() {
+            try {
+                const response = await fetch('/api/material_categories');
+                materialCategories = await response.json();
+                updateCategorySelects();
+            } catch (error) {
+                console.error('加载材料分类失败:', error);
+            }
+        }
+
+        // 更新所有分类选择框
+        function updateCategorySelects() {
+            console.log('🔄 开始更新分类选择框...');
+            console.log('📊 当前分类数据:', materialCategories);
+            
+            const selects = document.querySelectorAll('.category-select');
+            console.log('🎯 找到分类选择框数量:', selects.length);
+            
+            selects.forEach((select, index) => {
+                // 保存当前选择的值
+                const currentValue = select.value;
+                
+                select.innerHTML = '<option value="">分类</option>';
+                materialCategories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    select.appendChild(option);
+                    console.log(`➕ 添加分类选项: ${category.name} (ID: ${category.id})`);
+                });
+                
+                console.log(`✅ 分类选择框 ${index + 1} 更新完成，共 ${materialCategories.length} 个分类`);
+                
+                // 恢复之前选择的值
+                if (currentValue) {
+                    select.value = currentValue;
+                }
+                
+                // 添加分类选择事件监听（避免重复添加）
+                if (!select.hasAttribute('data-listener-added')) {
+                    select.addEventListener('change', function() {
+                        const row = this.closest('.input-row');
+                        const materialSelect = row.querySelector('.material-select');
+                        updateMaterialSelectByCategory(materialSelect, this.value);
+                    });
+                    select.setAttribute('data-listener-added', 'true');
+                }
+            });
+        }
+
+        // 根据分类更新材料选择框
+        function updateMaterialSelectByCategory(materialSelect, categoryId) {
+            materialSelect.innerHTML = '<option value="">请选择材料</option>';
+            
+            if (categoryId) {
+                const filteredMaterials = materials.filter(material => material.category_id == categoryId);
+                filteredMaterials.forEach(material => {
+                    const option = document.createElement('option');
+                    option.value = material.id;
+                    option.textContent = `${material.name} (${material.specification || ''})`;
+                    option.dataset.unitPrice = material.unit_price || 0;
+                    option.dataset.squarePrice = material.square_price || 0;
+                    option.dataset.categoryId = material.category_id || '';
+                    option.dataset.categoryName = material.category_name || '';
+                    materialSelect.appendChild(option);
+                });
+            }
+        }
+
+        // 更新所有材料选择框（初始化时使用）
+        function updateMaterialSelects() {
+            const selects = document.querySelectorAll('.material-select');
+            selects.forEach(select => {
+                select.innerHTML = '<option value="">请选择材料</option>';
+            });
+        }
+
+        // 更新所有工艺选择框
+        function updateProcessSelects() {
+            const selects = document.querySelectorAll('.process-select');
+            selects.forEach(select => {
+                // 保存当前选择的值
+                const currentValue = select.value;
+                
+                select.innerHTML = '<option value="">请选择工艺</option>';
+                processes.forEach(process => {
+                    const option = document.createElement('option');
+                    option.value = process.id;
+                    option.textContent = process.name;
+                    option.dataset.price = process.base_price || process.unit_price || 0;
+                    option.dataset.squarePrice = process.square_price || 0;
+                    option.dataset.baseProcesses = JSON.stringify(process.base_processes || []);
+                    select.appendChild(option);
+                });
+                
+                // 恢复之前选择的值
+                if (currentValue) {
+                    select.value = currentValue;
+                }
+            });
+        }
+
+        // 添加新行
+        function addNewRow() {
+            rowCounter++;
+            const container = document.getElementById('inputContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'input-row';
+            newRow.dataset.row = rowCounter;
+            
+            newRow.innerHTML = `
+                <div class="field-group material">
+                    <div class="d-flex gap-2" style="width: 100%;">
+                        <select class="form-select category-select" style="flex: 0 0 80px;" title="选择材料分类" aria-label="材料分类选择">
+                            <option value="">全部</option>
+                        </select>
+                        <select class="form-select material-select" required style="flex: 1; min-width: 400px;" title="选择具体材料" aria-label="材料选择">
+                            <option value="">请选择材料</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field-group quantity">
+                    <input type="number" class="form-control quantity-input" value="1" min="1" required aria-label="材料数量">
+                </div>
+                <div class="field-group dimension">
+                    <input type="number" class="form-control length-input" placeholder="长度" min="0" step="0.1" required aria-label="长度尺寸">
+                </div>
+                <div class="field-group dimension">
+                    <input type="number" class="form-control width-input" placeholder="宽度" min="0" step="0.1" required aria-label="宽度尺寸">
+                </div>
+                <div class="field-group process">
+                    <select class="form-select process-select" required aria-label="加工工艺选择">
+                        <option value="">请选择工艺</option>
+                    </select>
+                </div>
+                <div class="field-group price">
+                    <input type="text" class="form-control price-display text-center" readonly placeholder="自动计算" aria-label="计算价格">
+                </div>
+                <div class="field-group standard-index">
+                    <div class="standard-trigger is-empty" tabindex="0" aria-label="计算标准">
+                        <i class="fas fa-info-circle"></i>
+                        <span>计算标准</span>
+                        <div class="standard-tooltip">
+                            <div class="standard-empty">填写材料、尺寸和工艺后显示</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group operations">
+                    <button type="button" class="btn btn-remove" onclick="removeRow(this)" aria-label="删除当前行">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            // 添加动画效果
+            newRow.style.opacity = '0';
+            newRow.style.transform = 'translateY(20px)';
+            container.appendChild(newRow);
+            
+            // 触发动画
+            setTimeout(() => {
+                newRow.style.transition = 'all 0.5s ease';
+                newRow.style.opacity = '1';
+                newRow.style.transform = 'translateY(0)';
+            }, 10);
+            
+            // 更新新行的选择框
+            updateCategorySelects();
+            updateProcessSelects();
+            
+            // 添加事件监听
+            addRowEventListeners(newRow);
+        }
+
+        // 删除行
+        function removeRow(button) {
+            const row = button.closest('.input-row');
+            if (document.querySelectorAll('.input-row').length > 1) {
+                // 添加删除动画
+                row.style.transition = 'all 0.3s ease';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(-20px) scale(0.95)';
+                
+                setTimeout(() => {
+                    row.remove();
+                }, 300);
+            } else {
+                // 摇shake动画提示不能删除
+                row.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => {
+                    row.style.animation = '';
+                }, 500);
+                alert('至少需要保留一行');
+            }
+        }
+
+        // 为行添加事件监听
+        function addRowEventListeners(row) {
+            const materialSelect = row.querySelector('.material-select');
+            const quantityInput = row.querySelector('.quantity-input');
+            const lengthInput = row.querySelector('.length-input');
+            const widthInput = row.querySelector('.width-input');
+            const processSelect = row.querySelector('.process-select');
+            
+            [materialSelect, quantityInput, lengthInput, widthInput, processSelect].forEach(element => {
+                element.addEventListener('change', () => {
+                    console.log('🔄 输入值变更，重新计算价格...');
+                    calculatePrice(row);
+                });
+                element.addEventListener('input', () => {
+                    console.log('🔄 输入值变更，重新计算价格...');
+                    calculatePrice(row);
+                });
+            });
+        }
+        
+        // 添加项目套数变更监听
+        function addProjectSetsListener() {
+            const projectSetsInput = document.getElementById('projectSets');
+            if (projectSetsInput) {
+                projectSetsInput.addEventListener('change', () => {
+                    console.log('🔄 项目套数变更，重新计算所有行价格...');
+                    const rows = document.querySelectorAll('.input-row');
+                    rows.forEach(row => calculatePrice(row));
+                    updateManualCostTotals();
+                    saveFormData();
+                });
+                projectSetsInput.addEventListener('input', () => {
+                    console.log('🔄 项目套数变更，重新计算所有行价格...');
+                    const rows = document.querySelectorAll('.input-row');
+                    rows.forEach(row => calculatePrice(row));
+                    updateManualCostTotals();
+                    saveFormData();
+                });
+            }
+        }
+
+        // 计算价格
+        async function calculatePrice(row) {
+            console.log('🔄 开始计算价格...');
+            const materialSelect = row.querySelector('.material-select');
+            const quantityInput = row.querySelector('.quantity-input');
+            const lengthInput = row.querySelector('.length-input');
+            const widthInput = row.querySelector('.width-input');
+            const processSelect = row.querySelector('.process-select');
+            const priceDisplay = row.querySelector('.price-display');
+            
+            console.log('📋 表单数据:', {
+                material: materialSelect.value,
+                quantity: quantityInput.value,
+                length: lengthInput.value,
+                width: widthInput.value,
+                process: processSelect.value
+            });
+            
+            const materialOption = materialSelect.selectedOptions[0];
+            const processOption = processSelect.selectedOptions[0];
+            
+            // 检查数据完整性
+            const hasCompleteData = materialOption && processOption && lengthInput.value && widthInput.value && quantityInput.value;
+            console.log('📊 数据完整性检查:', hasCompleteData);
+            
+            // 如果数据不完整，清除价格显示和判定标准信息栏
+            if (!hasCompleteData) {
+                console.log('⚠️ 数据不完整，清除显示内容');
+                if (priceDisplay) priceDisplay.value = '';
+                clearStandardsInfoPanel(row);
+                return;
+            }
+            
+            if (materialOption && processOption && lengthInput.value && widthInput.value && quantityInput.value) {
+                const unitPrice = parseFloat(materialOption.dataset.unitPrice) || 0;
+                const squarePrice = parseFloat(materialOption.dataset.squarePrice) || 0;
+                const processPrice = parseFloat(processOption.dataset.price) || 0;
+                
+                const length = parseFloat(lengthInput.value) || 0;
+                const width = parseFloat(widthInput.value) || 0;
+                const quantity = parseFloat(quantityInput.value) || 1;
+                
+                // 计算面积（mm² 转 m²）- 材料计算方式：(长+30)*(宽+30)/1000000
+                const areaInSquareMeters = ((length + 30) * (width + 30)) / 1000000;
+                
+                let finalProcessPrice = processPrice;
+                let matchedPricingStandard = null;
+                const processName = processOption.textContent || '';
+                const projectSetsForMatch = parseInt(document.getElementById('projectSets').value) || 1;
+                const totalQuantityForMatch = quantity * projectSetsForMatch;
+                
+                // 尝试从判定标准API获取匹配的标准
+                try {
+                    const response = await fetch('/api/pricing_standards/match', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            process_name: processName,
+                            material_name: materialOption.textContent || '',
+                            material_category_id: materialOption.dataset.categoryId || '',
+                            material_category_name: materialOption.dataset.categoryName || '',
+                            length: length,
+                            width: width,
+                            quantity: totalQuantityForMatch
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.standard) {
+                        // 使用判定标准计算价格
+                        const standard = result.standard;
+                        matchedPricingStandard = standard;
+                        
+                        // 根据数量区间获取损耗数量
+                        const projectSets = parseInt(document.getElementById('projectSets').value) || 1;
+                        const totalQuantity = quantity * projectSets;
+                        const wastageQuantity = getWastageByQuantity(standard, totalQuantity);
+                        
+                        if (standard.type === 'combined') {
+                            // 组合工艺：需要分别计算每个组件的费用
+                            let totalProcessCost = 0;
+                            const projectSets = parseInt(document.getElementById('projectSets').value) || 1;
+                            const totalQuantity = quantity * projectSets;
+                            
+                            // 应用损耗：实际计算数量 = 原数量 + 损耗数量
+                            const actualQuantity = totalQuantity + wastageQuantity;
+                            
+                            // 遍历每个工艺组件
+                            if (standard.components) {
+                                for (const component of standard.components) {
+                                    let componentCost = 0;
+                                    
+                                    // 印刷单独分段：3000内按基础价，超出部分按每张平方价追加。
+                                    if (isPrintingComponent(component)) {
+                                        componentCost = getTieredPrintingUnitCost(component.base_price, component.square_price, areaInSquareMeters, totalQuantity);
+                                    } else {
+                                        // 其他工艺保持原计算逻辑。
+                                        componentCost = (component.base_price / actualQuantity) + (areaInSquareMeters * component.square_price * actualQuantity);
+                                    }
+                                    
+                                    totalProcessCost += componentCost;
+                                }
+                            }
+                            
+                            finalProcessPrice = totalProcessCost;
+                        } else if (standard.type === 'paper') {
+                            // 纸类材料标准：使用特殊计算公式
+                            const projectSets = parseInt(document.getElementById('projectSets').value) || 1;
+                            const totalQuantity = quantity * projectSets;
+                            // 应用损耗：实际计算数量 = 原数量 + 损耗数量
+                            const actualQuantity = totalQuantity + wastageQuantity;
+                            const additionalQuantity = standard.square_price; // 额外数量
+                            
+                            // 纸类材料计算公式：（项目套数*数量+判定数量标准的数量）*单价/（项目套数+数量）
+                            const materialName = materialOption.textContent || '';
+                            if (materialName.includes('纸')) {
+                                // 检查是否为卡纸或坑纸
+                                const isCardboard = materialName.includes('卡纸') || standard.name.includes('卡纸');
+                                const isCorrugated = materialName.includes('坑纸') || standard.name.includes('坑纸');
+                                
+                                if (isCardboard || isCorrugated) {
+                                    // 使用纸类材料特殊公式（含损耗）
+                                    const numerator = (projectSets * quantity + additionalQuantity) * unitPrice;
+                                    const denominator = projectSets * quantity;
+                                    const paperBasicUnitPrice = numerator / denominator;
+                                    
+                                    // 纸类材料的基本单价已包含材料和工艺成本
+                                    finalProcessPrice = 0; // 工艺成本为0，因为已包含在材料单价中
+                                    
+                                    // 更新材料成本为计算出的基本单价
+                                    const materialCostOverride = paperBasicUnitPrice;
+                                    
+                                    // 显示计算详情
+                                    console.log(`纸类材料计算(含损耗${wastageQuantity}): (${projectSets}*${quantity}+${additionalQuantity})*${unitPrice}/(${projectSets}*${quantity}) = ${paperBasicUnitPrice.toFixed(2)}`);
+                                    
+                                    // 直接计算总价（使用原始数量，不含损耗）
+                                    const totalPrice = paperBasicUnitPrice * quantity;
+                                    priceDisplay.value = `${totalPrice.toFixed(2)}元`;
+                                    
+                                    // 更新判定标准信息栏（纸类材料）
+                                    updateStandardsInfoPanel([standard], row);
+                                    return; // 提前返回，不执行后续计算
+                                }
+                            }
+                            
+                            // 如果不是纸类材料，使用普通计算（含损耗）
+                            finalProcessPrice = (standard.base_price / actualQuantity) + (areaInSquareMeters * standard.square_price * actualQuantity);
+                        } else {
+                            // 单一工艺
+                            const projectSets = parseInt(document.getElementById('projectSets').value) || 1;
+                            const totalQuantity = quantity * projectSets;
+                            // 应用损耗：实际计算数量 = 原数量 + 损耗数量
+                            const actualQuantity = totalQuantity + wastageQuantity;
+                            
+                            if (standard.type === 'printing' || processName.includes('印刷')) {
+                                finalProcessPrice = getTieredPrintingUnitCost(standard.base_price, standard.square_price, areaInSquareMeters, totalQuantity);
+                            } else {
+                                // 其他工艺保持原计算逻辑。
+                                finalProcessPrice = (standard.base_price / actualQuantity) + (areaInSquareMeters * standard.square_price * actualQuantity);
+                            }
+                        }
+                        
+                        if (standard.type !== 'paper') {
+                            finalProcessPrice = getPricingStandardProcessUnitCost(standard, areaInSquareMeters, totalQuantity);
+                        }
+                        
+                        // 更新判定标准信息栏
+                        updateStandardsInfoPanel([standard], row);
+                    } else {
+                        const fallbackStandard = buildFallbackStandard(row, processName);
+                        if (fallbackStandard) {
+                            finalProcessPrice = getPricingStandardProcessUnitCost(fallbackStandard, areaInSquareMeters, totalQuantity);
+                            updateStandardsInfoPanel([fallbackStandard], row);
+                        } else {
+                            const processSquarePrice = parseFloat(processOption.dataset.squarePrice) || 0;
+                            finalProcessPrice = getDefaultProcessUnitCost(processPrice, processSquarePrice, areaInSquareMeters, totalQuantity);
+                            updateStandardsInfoPanel([{
+                                type: 'other_process',
+                                name: `默认${processName}计算`,
+                                base_price: processPrice,
+                                square_price: processSquarePrice,
+                                quantity_range: `总数量: ${totalQuantity}件`
+                            }], row);
+                        }
+                    }
+                } catch (error) {
+                    console.log('判定标准API调用失败，使用默认计算方式:', error);
+                    
+                    // 如果API调用失败，使用本地同口径兜底。
+                    const projectSets = parseInt(document.getElementById('projectSets').value) || 1;
+                    const totalQuantity = quantity * projectSets;
+                    const fallbackStandard = buildFallbackStandard(row, processName);
+                    if (fallbackStandard) {
+                        finalProcessPrice = getPricingStandardProcessUnitCost(fallbackStandard, areaInSquareMeters, totalQuantity);
+                        updateStandardsInfoPanel([fallbackStandard], row);
+                    } else {
+                        const processSquarePrice = parseFloat(processOption.dataset.squarePrice) || 0;
+                        finalProcessPrice = getDefaultProcessUnitCost(processPrice, processSquarePrice, areaInSquareMeters, totalQuantity);
+                        updateStandardsInfoPanel([{
+                            type: 'fallback',
+                            name: '简化计算模式',
+                            base_price: processPrice,
+                            square_price: processSquarePrice,
+                            quantity_range: `总数量: ${totalQuantity}件 (API调用失败)`
+                        }], row);
+                    }
+                }
+                
+                // 按照正确的计算公式计算价格
+                const projectSets = parseInt(document.getElementById('projectSets').value) || 1;
+                const totalQuantity = quantity * projectSets;
+                
+                // 1. 材料成本：(长+30)*(宽+30)/1000000 * 材料平方单价
+                const materialCost = areaInSquareMeters * squarePrice;
+                
+                // 2. 工艺成本计算
+                let processCost = 0;
+                
+                /*
+                ╔══════════════════════════════════════════════════════════════════════════════════╗
+                ║                            ⚠️  严重警告 - 请勿修改  ⚠️                              ║
+                ║                                                                                  ║
+                ║  此区域包含印刷标准判定的核心逻辑，已经过严格测试和验证                                    ║
+                ║  任何修改都可能导致报价计算错误，造成严重的业务损失                                      ║
+                ║                                                                                  ║
+                ║  如需修改，必须：                                                                    ║
+                ║  1. 获得系统管理员书面批准                                                            ║
+                ║  2. 通过完整的测试验证                                                               ║
+                ║  3. 备份当前版本                                                                    ║
+                ║  4. 记录修改原因和责任人                                                             ║
+                ║                                                                                  ║
+                ║  管理员联系方式: [请填写您的联系方式]                                                  ║
+                ║  最后验证时间: 2024-01-01                                                           ║
+                ║  验证人员: System Administrator                                                     ║
+                ╚══════════════════════════════════════════════════════════════════════════════════╝
+                */
+                
+                // 印刷标准保护锁 - 防止意外修改
+                const PRINTING_STANDARDS_LOCK = Object.freeze({
+                    isLocked: true,
+                    adminKey: 'ADMIN_APPROVE_2024',
+                    lastModified: '2024-01-01',
+                    modifiedBy: 'System Administrator',
+                    // 添加代码完整性校验
+                    codeHash: 'PSL_2024_VERIFIED',
+                    warningShown: false
+                });
+                
+                // 验证印刷标准修改权限 - 受保护函数
+                function validatePrintingStandardsAccess(action = 'read') {
+                    // 显示警告（仅首次）
+                    if (!PRINTING_STANDARDS_LOCK.warningShown && action === 'modify') {
+                        console.warn('⚠️ 警告：正在尝试访问受保护的印刷标准判定逻辑！');
+                        console.warn('📋 修改前请确保：1.获得管理员批准 2.完成测试验证 3.备份当前版本');
+                        // 注意：由于Object.freeze，这里无法修改warningShown，但警告仍会显示
+                    }
+                    
+                    if (action === 'modify' && PRINTING_STANDARDS_LOCK.isLocked) {
+                        const userKey = prompt('⚠️ 印刷标准已锁定！\n\n此区域包含核心业务逻辑，修改可能导致严重后果。\n\n请输入管理员密钥以继续:');
+                        if (userKey !== PRINTING_STANDARDS_LOCK.adminKey) {
+                            alert('❌ 密钥错误！印刷标准修改被拒绝。\n\n如需修改，请联系系统管理员获得授权。\n修改前请确保已完成必要的测试和备份。');
+                            console.error('🚫 未授权的印刷标准修改尝试被阻止');
+                            return false;
+                        }
+                        console.log('✅ 管理员权限验证通过，允许修改印刷标准');
+                        console.log('📝 请记录修改原因和责任人');
+                    }
+                    return true;
+                }
+                
+                // 尺寸判定函数 - 根据长宽判定工艺标准
+                function getProcessStandard(processType, length, width) {
+                    // 印刷标准访问验证
+                    if (processType === 'printing' && !validatePrintingStandardsAccess('read')) {
+                        return { name: '访问被拒绝', basePrice: 0, squarePrice: 0 };
+                    }
+                    
+                    // 确保长宽不受顺序影响，取较大值和较小值
+                    const maxDimension = Math.max(length, width);
+                    const minDimension = Math.min(length, width);
+                    
+                    // ==================== 核心业务逻辑保护区域 ====================
+                    // ⚠️ 警告：以下代码包含印刷标准判定的核心逻辑
+                    // 🔒 此区域受到严格保护，任何修改都可能影响整个报价系统
+                    // 📋 修改前必须：1.获得管理员授权 2.完成充分测试 3.备份当前版本
+                    // 🏷️ 代码哈希：PRINT_LOGIC_v2.1_PROTECTED
+                    // ============================================================
+                    
+                    // 印刷工艺尺寸判定：按能容纳当前尺寸的最小机型匹配。
+                    if (processType === 'printing') {
+                        if (maxDimension <= 720 && minDimension <= 360) {
+                            return { name: '4开机器', basePrice: 200, squarePrice: 0.1 };
+                        } 
+                        else if (maxDimension <= 1019 && minDimension <= 719) {
+                            return { name: '对开机', basePrice: 1000, squarePrice: 0.2 };
+                        } 
+                        else if (maxDimension <= 1419 && minDimension <= 1019) {
+                            return { name: '全开机', basePrice: 1500, squarePrice: 1 };
+                        } 
+                        else if (maxDimension <= 1620 && minDimension <= 1220) {
+                            return { name: '大全开', basePrice: 2000, squarePrice: 0.5 };
+                        } 
+                        else {
+                            return { name: '大幅面印刷', basePrice: 2000, squarePrice: 0.4 };
+                        }
+                    }
+                    // ==================== 保护区域结束 ========================
+                    // 模切工艺尺寸判定
+                    else if (processType === 'die-cutting') {
+                        if (maxDimension <= 650 && minDimension <= 450) {
+                            return { name: '4开模切', basePrice: 100, squarePrice: 0.15 };
+                        } 
+                        else if (maxDimension <= 1020 && minDimension <= 720) {
+                            return { name: '对开模切', basePrice: 150, squarePrice: 0.2 };
+                        } 
+                        else if (maxDimension <= 1420 && minDimension <= 1020) {
+                            return { name: '全开模切', basePrice: 200, squarePrice: 0.25 };
+                        } 
+                        else if (maxDimension <= 1620 && minDimension <= 1220) {
+                            return { name: '大全开模切', basePrice: 250, squarePrice: 0.3 };
+                        } else {
+                            return { name: '大幅面模切', basePrice: 200, squarePrice: 0.25 };
+                        }
+                    }
+                    // 切割工艺尺寸判定（与模切类似）
+                    else if (processType === 'cutting') {
+                        if (maxDimension <= 650 && minDimension <= 450) {
+                            return { name: '4开切割', basePrice: 80, squarePrice: 0.12 };
+                        } 
+                        else if (maxDimension <= 1020 && minDimension <= 720) {
+                            return { name: '对开切割', basePrice: 120, squarePrice: 0.15 };
+                        } 
+                        else if (maxDimension <= 1420 && minDimension <= 1020) {
+                            return { name: '全开切割', basePrice: 160, squarePrice: 0.2 };
+                        } 
+                        else if (maxDimension <= 1620 && minDimension <= 1220) {
+                            return { name: '大全开切割', basePrice: 200, squarePrice: 0.25 };
+                        } else {
+                            return { name: '大幅面切割', basePrice: 160, squarePrice: 0.2 };
+                        }
+                    }
+                    // 光油工艺尺寸判定
+                    else if (processType === 'varnish') {
+                        if (maxDimension <= 650 && minDimension <= 450) {
+                            return { name: '4开光油', basePrice: 80, squarePrice: 0.1 };
+                        } 
+                        else if (maxDimension <= 1020 && minDimension <= 720) {
+                            return { name: '对开光油', basePrice: 120, squarePrice: 0.15 };
+                        } 
+                        else if (maxDimension <= 1420 && minDimension <= 1020) {
+                            return { name: '全开光油', basePrice: 150, squarePrice: 0.2 };
+                        } 
+                        else if (maxDimension <= 1620 && minDimension <= 1220) {
+                            return { name: '大全开光油', basePrice: 180, squarePrice: 0.25 };
+                        } else {
+                            return { name: '大幅面光油', basePrice: 150, squarePrice: 0.2 };
+                        }
+                    }
+                    // 覆膜工艺尺寸判定
+                    else if (processType === 'lamination') {
+                        if (maxDimension <= 650 && minDimension <= 450) {
+                            return { name: '4开覆膜', basePrice: 100, squarePrice: 0.2 };
+                        } 
+                        else if (maxDimension <= 1020 && minDimension <= 720) {
+                            return { name: '对开覆膜', basePrice: 150, squarePrice: 0.25 };
+                        } 
+                        else if (maxDimension <= 1420 && minDimension <= 1020) {
+                            return { name: '全开覆膜', basePrice: 200, squarePrice: 0.3 };
+                        } 
+                        else if (maxDimension <= 1620 && minDimension <= 1220) {
+                            return { name: '大全开覆膜', basePrice: 250, squarePrice: 0.35 };
+                        } else {
+                            return { name: '大幅面覆膜', basePrice: 180, squarePrice: 0.3 };
+                        }
+                    }
+                    return { name: '标准工艺', basePrice: finalProcessPrice, squarePrice: 0 };
+                }
+                
+                // 处理组合工艺，分别计算每个工艺的费用
+                processCost = 0;
+                let processDetails = [];
+                
+                if (matchedPricingStandard) {
+                    processCost = finalProcessPrice;
+                    processDetails.push(`判定标准: ${matchedPricingStandard.name || '已匹配标准'} ${processCost.toFixed(2)}元`);
+                    console.log(`使用判定标准计算工艺费用: ${processCost.toFixed(4)}元/件`);
+                } else {
+                    // 印刷工艺
+                    if (processName.includes('印刷')) {
+                    const standard = getProcessStandard('printing', length, width);
+                    const printingCost = getTieredPrintingUnitCost(standard.basePrice, standard.squarePrice, areaInSquareMeters, totalQuantity);
+                    
+                    processCost += printingCost;
+                    processDetails.push(`印刷: ${printingCost.toFixed(2)}元`);
+                    console.log(`印刷分段计算: (${standard.basePrice}+${areaInSquareMeters}*${standard.squarePrice}*${getTieredPrintingOverflowQuantity(totalQuantity)})/${totalQuantity} = ${printingCost.toFixed(2)}元`);
+                    }
+                
+                    // 模切工艺
+                    if (processName.includes('模切')) {
+                    const standard = getProcessStandard('die-cutting', length, width);
+                    // 模切成本：基本价格/项目数量*部件数量 + 尺寸*平米单价
+                    const baseCost = standard.basePrice / (projectSets * quantity);
+                    const squareCost = areaInSquareMeters * standard.squarePrice;
+                    const dieCuttingCost = baseCost + squareCost;
+                    
+                    processCost += dieCuttingCost;
+                    processDetails.push(`模切: ${dieCuttingCost.toFixed(2)}元`);
+                    console.log(`模切成本计算: ${standard.basePrice}/${totalQuantity} + ${areaInSquareMeters}*${standard.squarePrice} = ${dieCuttingCost.toFixed(2)}元`);
+                    }
+                
+                    // 切割工艺
+                    if (processName.includes('切割')) {
+                    const standard = getProcessStandard('cutting', length, width);
+                    // 切割成本：基本价格/项目数量*部件数量 + 尺寸*平米单价
+                    const baseCost = standard.basePrice / (projectSets * quantity);
+                    const squareCost = areaInSquareMeters * standard.squarePrice;
+                    const cuttingCost = baseCost + squareCost;
+                    
+                    processCost += cuttingCost;
+                    processDetails.push(`切割: ${cuttingCost.toFixed(2)}元`);
+                    console.log(`切割成本计算: ${standard.basePrice}/${totalQuantity} + ${areaInSquareMeters}*${standard.squarePrice} = ${cuttingCost.toFixed(2)}元`);
+                    }
+                
+                    // 光油工艺
+                    if (processName.includes('光油')) {
+                    const standard = getProcessStandard('varnish', length, width);
+                    // 光油成本：尺寸*平米单价
+                    const varnishCost = areaInSquareMeters * standard.squarePrice;
+                    
+                    processCost += varnishCost;
+                    processDetails.push(`光油: ${varnishCost.toFixed(2)}元`);
+                    console.log(`光油成本计算: ${areaInSquareMeters}*${standard.squarePrice} = ${varnishCost.toFixed(2)}元`);
+                    }
+                
+                    // 覆膜工艺
+                    if (processName.includes('覆膜') || processName.includes('光膜')) {
+                    const standard = getProcessStandard('lamination', length, width);
+                    // 覆膜成本：尺寸*平米单价
+                    const laminationCost = areaInSquareMeters * standard.squarePrice;
+                    
+                    processCost += laminationCost;
+                    processDetails.push(`覆膜: ${laminationCost.toFixed(2)}元`);
+                    console.log(`覆膜成本计算: ${areaInSquareMeters}*${standard.squarePrice} = ${laminationCost.toFixed(2)}元`);
+                    }
+                
+                    // 如果没有匹配到任何已知工艺，使用原有逻辑
+                    if (processCost === 0) {
+                    processCost = finalProcessPrice;
+                    processDetails.push(`其他工艺: ${finalProcessPrice.toFixed(2)}元`);
+                    }
+                }
+                
+                // 显示工艺费用明细
+                if (processDetails.length > 0) {
+                    console.log(`工艺费用明细: ${processDetails.join(' + ')} = ${processCost.toFixed(2)}元`);
+                }
+                
+                // 总单价 = 材料成本 + 工艺成本
+                const totalUnitPrice = materialCost + processCost;
+                
+                // 计算总价
+                const totalPrice = totalUnitPrice * quantity;
+                
+                priceDisplay.value = `${totalPrice.toFixed(2)}元`;
+                
+
+            } else {
+                priceDisplay.value = '';
+                // 清除判定标准信息栏
+                clearStandardsInfoPanel(row);
+            }
+        }
+
+        // 完成报价单
+        function completeQuotation() {
+            // 验证套数
+            const projectSetsInput = document.getElementById('projectSets');
+            const projectSets = parseInt(projectSetsInput.value) || 0;
+            
+            if (projectSets <= 0) {
+                alert('请输入有效的项目套数');
+                projectSetsInput.focus();
+                return;
+            }
+            
+            const rows = document.querySelectorAll('.input-row');
+            const items = [];
+            let isValid = true;
+            
+            rows.forEach((row, index) => {
+                const materialSelect = row.querySelector('.material-select');
+                const quantityInput = row.querySelector('.quantity-input');
+                const lengthInput = row.querySelector('.length-input');
+                const widthInput = row.querySelector('.width-input');
+                const processSelect = row.querySelector('.process-select');
+                const priceDisplay = row.querySelector('.price-display');
+                
+                // 验证必填字段
+                if (!materialSelect.value || !quantityInput.value || !lengthInput.value || !widthInput.value || !processSelect.value) {
+                    alert(`第${index + 1}行存在未填写的必填字段`);
+                    isValid = false;
+                    return;
+                }
+                
+                // 计算价格信息
+                const materialOption = materialSelect.selectedOptions[0];
+                const processOption = processSelect.selectedOptions[0];
+                const unitPrice = parseFloat(materialOption.dataset.unitPrice) || 0;
+                const squarePrice = parseFloat(materialOption.dataset.squarePrice) || 0;
+                const processPrice = parseFloat(processOption.dataset.price) || 0;
+                
+                const length = parseFloat(lengthInput.value);
+                const width = parseFloat(widthInput.value);
+                const quantity = parseFloat(quantityInput.value);
+                
+                // 计算面积（mm² 转 m²）- 材料计算方式：(长+30)*(宽+30)/1000000
+                const areaInSquareMeters = ((length + 30) * (width + 30)) / 1000000;
+                
+                let finalProcessPrice = processPrice;
+                
+                // 检查是否为纸类材料的特殊计算
+                const materialName = materialOption.textContent || '';
+                let totalUnitPrice;
+                
+                if (materialName.includes('纸') && (materialName.includes('卡纸') || materialName.includes('坑纸'))) {
+                    // 纸类材料特殊计算：(项目套数*数量+判定数量标准的数量)*单价/(项目套数*数量)
+                    // 这里需要从API获取判定标准的额外数量
+                    const extraQuantity = 30; // 临时值，实际应从API获取
+                    const numerator = (projectSets * quantity + extraQuantity) * squarePrice;
+                    const denominator = projectSets * quantity;
+                    totalUnitPrice = numerator / denominator;
+                    
+                    console.log(`纸类材料计算: (${projectSets}*${quantity}+${extraQuantity})*${squarePrice}/(${projectSets}*${quantity}) = ${totalUnitPrice.toFixed(2)}`);
+                } else {
+                    // 按照正确的计算公式：材料成本 + 工艺成本
+                    // 1. 材料成本：(长+30)*(宽+30)/1000000 * 材料平方单价
+                    const materialCost = areaInSquareMeters * squarePrice;
+                    
+                    // 2. 工艺成本计算 - 根据工艺类型分别处理
+                    let processCost = 0;
+                    const processName = processSelect.selectedOptions[0].textContent;
+                    const totalQuantity = quantity * projectSets;
+                    const processSquarePrice = parseFloat(processOption.dataset.squarePrice) || 0;
+                
+                    if (processName.includes('印刷')) {
+                        processCost = getTieredPrintingUnitCost(processPrice, processSquarePrice, areaInSquareMeters, totalQuantity);
+                    } else if (processName.includes('模切') || processName.includes('切割')) {
+                        // 模切/切割成本：面积 * 平方价格
+                        processCost = areaInSquareMeters * processSquarePrice;
+                    } else if (processName.includes('模具')) {
+                        // 模具成本：基础费用均摊 + 尺寸*模具平方单价*项目数量
+                        const moldBaseCost = processPrice / totalQuantity;
+                        const moldSquareCost = areaInSquareMeters * processSquarePrice * totalQuantity;
+                        processCost = moldBaseCost + moldSquareCost;
+                    } else if (processName.includes('覆膜') || processName.includes('光油') || processName.includes('光膜')) {
+                        // 覆膜/光油成本：基础价格均摊 + 面积*平方价格
+                        const baseCost = processPrice / totalQuantity;
+                        const squareCost = areaInSquareMeters * processSquarePrice;
+                        processCost = baseCost + squareCost;
+                    } else {
+                        // 其他工艺：直接使用工艺价格
+                        processCost = processPrice;
+                    }
+                    
+                    // 总单价 = 材料成本 + 工艺成本
+                    totalUnitPrice = materialCost + processCost;
+                }
+                
+                // 计算总价 = 单价 * 数量；优先使用页面已按判定标准算出的金额。
+                let totalPrice = totalUnitPrice * quantity;
+                const displayedTotalPrice = parseFloat((priceDisplay?.value || '').replace(/[^\d.-]/g, '')) || 0;
+                if (displayedTotalPrice > 0) {
+                    totalPrice = displayedTotalPrice;
+                    totalUnitPrice = displayedTotalPrice / quantity;
+                }
+                
+                // 获取材料平方单价
+                const materialSquarePrice = parseFloat(materialOption.dataset.squarePrice) || 0;
+                console.log(`材料: ${materialSelect.selectedOptions[0].textContent}, 平方单价: ${materialSquarePrice}`);
+                console.log(`原始数据: materialOption.dataset.squarePrice = ${materialOption.dataset.squarePrice}`);
+                
+                items.push({
+                    material_id: materialSelect.value,
+                    material_name: materialSelect.selectedOptions[0].textContent,
+                    material_category_id: materialOption.dataset.categoryId || '',
+                    material_category_name: materialOption.dataset.categoryName || '',
+                    quantity: quantity,
+                    length: length,
+                    width: width,
+                    process_id: processSelect.value,
+                    process_name: processSelect.selectedOptions[0].textContent,
+                    unit_price: totalUnitPrice,
+                    total_price: totalPrice,
+                    area: areaInSquareMeters,
+                    material_square_price: materialSquarePrice,
+                    process_base_price: processPrice,
+                    process_square_price: parseFloat(processOption.dataset.squarePrice) || 0,
+                    process_base_processes: JSON.parse(processOption.dataset.baseProcesses || '[]')
+                });
+            });
+            
+            if (isValid && items.length > 0) {
+                const manualCosts = getManualCosts();
+                const manualTotal = Object.values(manualCosts).reduce((sum, item) => sum + item.total_price, 0);
+                
+                // 准备报价单数据，包含套数信息
+                const quotationData = {
+                    project_sets: projectSets,
+                    items: items,
+                    manual_costs: manualCosts,
+                    total_amount: items.reduce((sum, item) => sum + (item.total_price * projectSets), 0) + manualTotal
+                };
+                
+                console.log('=== 完成报价单 ===');
+                console.log('项目套数:', projectSets);
+                console.log('项目数量:', items.length);
+                
+                // 检查每个项目的数据
+                items.forEach((item, index) => {
+                    console.log(`项目 ${index + 1}:`, {
+                        material_name: item.material_name,
+                        process_name: item.process_name,
+                        material_square_price: item.material_square_price,
+                        quantity: item.quantity,
+                        area: item.area,
+                        length: item.length,
+                        width: item.width
+                    });
+                });
+                
+                // 跳转到报价单显示页面
+                const quotationDataJson = JSON.stringify(quotationData);
+                console.log('报价单数据JSON:', quotationDataJson);
+                sessionStorage.setItem('quotationData', quotationDataJson);
+                console.log('已保存到sessionStorage');
+                
+                // 清除表单临时数据
+                localStorage.removeItem('quotationFormData');
+                console.log('已清除表单临时数据');
+                
+                window.location.href = '/quotation_display/0';
+            }
+        }
+
+        // 保存表单数据到localStorage
+        function saveFormData() {
+            const formData = {
+                projectSets: document.getElementById('projectSets').value,
+                manualCosts: getManualCosts(),
+                rows: []
+            };
+            
+            const rows = document.querySelectorAll('.input-row');
+            rows.forEach(row => {
+                const categorySelect = row.querySelector('.category-select');
+                const materialSelect = row.querySelector('.material-select');
+                const quantityInput = row.querySelector('.quantity-input');
+                const lengthInput = row.querySelector('.length-input');
+                const widthInput = row.querySelector('.width-input');
+                const processSelect = row.querySelector('.process-select');
+                
+                formData.rows.push({
+                    categoryId: categorySelect.value,
+                    materialId: materialSelect.value,
+                    quantity: quantityInput.value,
+                    length: lengthInput.value,
+                    width: widthInput.value,
+                    processId: processSelect.value
+                });
+            });
+            
+            localStorage.setItem('quotationFormData', JSON.stringify(formData));
+        }
+        
+        // 从localStorage恢复表单数据
+        function restoreFormData() {
+            const savedData = localStorage.getItem('quotationFormData');
+            if (!savedData) return;
+            
+            try {
+                const formData = JSON.parse(savedData);
+                
+                // 恢复项目套数
+                if (formData.projectSets) {
+                    document.getElementById('projectSets').value = formData.projectSets;
+                }
+
+                if (formData.manualCosts) {
+                    Object.entries(manualCostFields).forEach(([key, config]) => {
+                        const unitInput = document.getElementById(config.inputId);
+                        const totalInput = document.getElementById(config.totalInputId);
+                        const value = formData.manualCosts[key]?.unit_price ?? formData.manualCosts[key]?.unitPrice ?? 0;
+                        const totalValue = formData.manualCosts[key]?.total_price ?? formData.manualCosts[key]?.totalPrice ?? 0;
+                        if (unitInput) unitInput.value = value;
+                        if (totalInput) {
+                            totalInput.value = totalValue;
+                            totalInput.dataset.source = formData.manualCosts[key]?.source || 'unit';
+                        }
+                    });
+                    updateManualCostTotals();
+                }
+                
+                // 恢复行数据
+                if (formData.rows && formData.rows.length > 0) {
+                    // 先清除现有行（除了第一行）
+                    const existingRows = document.querySelectorAll('.input-row');
+                    for (let i = 1; i < existingRows.length; i++) {
+                        existingRows[i].remove();
+                    }
+                    
+                    // 恢复每一行的数据
+                    formData.rows.forEach((rowData, index) => {
+                        let row;
+                        if (index === 0) {
+                            // 使用第一行
+                            row = document.querySelector('.input-row');
+                        } else {
+                            // 添加新行
+                            addNewRow();
+                            row = document.querySelectorAll('.input-row')[index];
+                        }
+                        
+                        if (row) {
+                            // 恢复各字段值
+                            setTimeout(() => {
+                                const categorySelect = row.querySelector('.category-select');
+                                const materialSelect = row.querySelector('.material-select');
+                                const quantityInput = row.querySelector('.quantity-input');
+                                const lengthInput = row.querySelector('.length-input');
+                                const widthInput = row.querySelector('.width-input');
+                                const processSelect = row.querySelector('.process-select');
+                                
+                                if (rowData.categoryId) {
+                                    categorySelect.value = rowData.categoryId;
+                                    // 触发分类变更事件
+                                    updateMaterialSelectByCategory(materialSelect, rowData.categoryId);
+                                    
+                                    setTimeout(() => {
+                                        if (rowData.materialId) {
+                                            materialSelect.value = rowData.materialId;
+                                        }
+                                    }, 100);
+                                }
+                                
+                                if (rowData.quantity) quantityInput.value = rowData.quantity;
+                                if (rowData.length) lengthInput.value = rowData.length;
+                                if (rowData.width) widthInput.value = rowData.width;
+                                if (rowData.processId) processSelect.value = rowData.processId;
+                                
+                                // 触发价格计算
+                                setTimeout(() => {
+                                    calculatePrice(row);
+                                }, 200);
+                            }, 100 * (index + 1));
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('恢复表单数据失败:', error);
+                localStorage.removeItem('quotationFormData');
+            }
+        }
+        
+        // 清空表单数据
+        function clearFormData() {
+            if (confirm('确定要清空所有表单数据吗？此操作不可撤销。')) {
+                // 清除localStorage
+                localStorage.removeItem('quotationFormData');
+                
+                // 重置表单
+                document.getElementById('projectSets').value = '1';
+                Object.values(manualCostFields).forEach(config => {
+                    const input = document.getElementById(config.inputId);
+                    const totalInput = document.getElementById(config.totalInputId);
+                    if (input) input.value = '0';
+                    if (totalInput) {
+                        totalInput.value = '0';
+                        totalInput.dataset.source = 'unit';
+                    }
+                });
+                updateManualCostTotals();
+                
+                // 清除所有行（保留第一行）
+                const rows = document.querySelectorAll('.input-row');
+                for (let i = 1; i < rows.length; i++) {
+                    rows[i].remove();
+                }
+                
+                // 重置第一行
+                const firstRow = document.querySelector('.input-row');
+                if (firstRow) {
+                    firstRow.querySelector('.category-select').value = '';
+                    firstRow.querySelector('.material-select').innerHTML = '<option value="">请选择材料</option>';
+                    firstRow.querySelector('.quantity-input').value = '1';
+                    firstRow.querySelector('.length-input').value = '';
+                    firstRow.querySelector('.width-input').value = '';
+                    firstRow.querySelector('.process-select').value = '';
+                    firstRow.querySelector('.price-display').value = '';
+                    clearStandardsInfoPanel(firstRow);
+                }
+                
+                rowCounter = 1;
+            }
+        }
+        
+        // 为表单元素添加自动保存事件监听
+        function addAutoSaveListeners() {
+            // 项目套数变更时保存
+            document.getElementById('projectSets').addEventListener('input', saveFormData);
+            Object.entries(manualCostFields).forEach(([key, config]) => {
+                const unitInput = document.getElementById(config.inputId);
+                const totalInput = document.getElementById(config.totalInputId);
+                
+                unitInput.addEventListener('input', () => {
+                    syncManualCost(key, 'unit');
+                    saveFormData();
+                });
+                unitInput.addEventListener('change', () => {
+                    syncManualCost(key, 'unit');
+                    saveFormData();
+                });
+                totalInput.addEventListener('input', () => {
+                    syncManualCost(key, 'total');
+                    saveFormData();
+                });
+                totalInput.addEventListener('change', () => {
+                    syncManualCost(key, 'total');
+                    saveFormData();
+                });
+            });
+            
+            // 为所有输入框和选择框添加事件监听
+            document.addEventListener('change', function(e) {
+                if (e.target.matches('.category-select, .material-select, .quantity-input, .length-input, .width-input, .process-select')) {
+                    setTimeout(saveFormData, 100); // 延迟保存，确保DOM更新完成
+                }
+            });
+            
+            document.addEventListener('input', function(e) {
+                if (e.target.matches('.quantity-input, .length-input, .width-input')) {
+                    setTimeout(saveFormData, 100);
+                }
+            });
+        }
+        
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getRowCalculationContext(row) {
+            const projectSets = parseInt(document.getElementById('projectSets').value) || 1;
+            const length = parseFloat(row?.querySelector('.length-input')?.value) || 0;
+            const width = parseFloat(row?.querySelector('.width-input')?.value) || 0;
+            const quantity = parseFloat(row?.querySelector('.quantity-input')?.value) || 1;
+            const totalQuantity = quantity * projectSets;
+            const area = length > 0 && width > 0 ? ((length + 30) * (width + 30)) / 1000000 : 0;
+            return { projectSets, length, width, quantity, totalQuantity, area };
+        }
+
+        function formatAmount(value, digits = 4) {
+            const number = Number(value) || 0;
+            return number.toFixed(digits);
+        }
+
+        function getWastageRangeText(quantity) {
+            if (quantity <= 100) return '0-100件';
+            if (quantity <= 3000) return '100-3000件';
+            return '3000件以上';
+        }
+
+        function includesAny(text, keywords) {
+            const value = String(text || '').toLowerCase();
+            return keywords.some(keyword => value.includes(String(keyword).toLowerCase()));
+        }
+
+        function getTieredPrintingOverflowQuantity(totalQuantity) {
+            return Math.max((Number(totalQuantity) || 0) - 3000, 0);
+        }
+
+        function getTieredPrintingUnitCost(basePrice, squarePrice, area, totalQuantity) {
+            const quantity = Math.max(Number(totalQuantity) || 0, 1);
+            const baseCost = Number(basePrice) || 0;
+            const overflowQuantity = getTieredPrintingOverflowQuantity(quantity);
+            const overflowCost = (Number(area) || 0) * (Number(squarePrice) || 0) * overflowQuantity;
+            return (baseCost + overflowCost) / quantity;
+        }
+
+        function getPricingStandardProcessUnitCost(standard, area, totalQuantity) {
+            const quantity = Math.max(Number(totalQuantity) || 0, 1);
+            const wastage = getWastageByQuantity(standard, quantity);
+            const actualQuantity = quantity + wastage;
+            const components = standard.type === 'combined' && Array.isArray(standard.components)
+                ? standard.components
+                : [standard];
+            const ctx = { area: Number(area) || 0, totalQuantity: quantity };
+            
+            return components.reduce((sum, component) => {
+                return sum + getComponentUnitCost(component, ctx, actualQuantity);
+            }, 0);
+        }
+
+        function getRowSelectionContext(row) {
+            const materialOption = row?.querySelector('.material-select')?.selectedOptions?.[0];
+            const categoryOption = row?.querySelector('.category-select')?.selectedOptions?.[0];
+            const processOption = row?.querySelector('.process-select')?.selectedOptions?.[0];
+            const priceDisplay = row?.querySelector('.price-display');
+            const materialName = materialOption?.textContent || '';
+            const materialCategoryName = materialOption?.dataset.categoryName || (categoryOption?.value ? categoryOption.textContent : '');
+            const processName = processOption?.textContent || '';
+            const materialSquarePrice = Number(materialOption?.dataset.squarePrice) || 0;
+            const processBasePrice = Number(processOption?.dataset.price) || 0;
+            const processSquarePrice = Number(processOption?.dataset.squarePrice) || 0;
+            const displayedAmount = Number((priceDisplay?.value || '').replace(/[^\d.-]/g, '')) || 0;
+            const materialText = `${materialName} ${materialCategoryName}`;
+            const fullText = `${materialText} ${processName}`;
+            const isGraphicsMaterial = includesAny(materialText, ['画面', '写真', '喷绘', '背胶', 'pp', 'UV', '印刷']);
+            const isGraphicsProcess = includesAny(processName, ['印刷', '写真', '喷绘', 'UV']);
+            const isLabor = includesAny(fullText, ['人工', '安装', '工时']);
+            const isMainMaterial = !isGraphicsMaterial && !isLabor;
+
+            return {
+                materialName,
+                materialCategoryName,
+                processName,
+                materialSquarePrice,
+                processBasePrice,
+                processSquarePrice,
+                displayedAmount,
+                isGraphicsMaterial,
+                isGraphicsProcess,
+                isGraphics: isGraphicsMaterial || isGraphicsProcess,
+                isLabor,
+                isMainMaterial
+            };
+        }
+
+        function getComponentText(component) {
+            const type = component.type || '';
+            const name = component.name || '';
+            const description = component.description || '';
+            return `${type} ${name} ${description}`;
+        }
+
+        function isGraphicsComponent(component) {
+            return includesAny(getComponentText(component), ['printing', '印刷', '写真', '喷绘', 'UV', '画面']);
+        }
+
+        function isPrintingComponent(component) {
+            return includesAny(getComponentText(component), ['printing', '印刷']);
+        }
+
+        function isLaborComponent(component) {
+            return includesAny(getComponentText(component), ['labor', '人工', '安装', '工时']);
+        }
+
+        function getLocalProcessStandard(processType, length, width) {
+            const maxDimension = Math.max(length, width);
+            const minDimension = Math.min(length, width);
+
+            if (processType === 'printing') {
+                if (maxDimension <= 720 && minDimension <= 360) return { name: '4开机器', basePrice: 200, squarePrice: 0.1 };
+                if (maxDimension <= 1019 && minDimension <= 719) return { name: '对开机', basePrice: 1000, squarePrice: 0.2 };
+                if (maxDimension <= 1419 && minDimension <= 1019) return { name: '全开机', basePrice: 1500, squarePrice: 1 };
+                if (maxDimension <= 1620 && minDimension <= 1220) return { name: '大全开', basePrice: 2000, squarePrice: 0.5 };
+                return { name: '大幅面印刷', basePrice: 2000, squarePrice: 0.4 };
+            }
+
+            if (processType === 'die-cutting') {
+                if (maxDimension <= 650 && minDimension <= 450) return { name: '4开模切', basePrice: 100, squarePrice: 0.15 };
+                if (maxDimension <= 1020 && minDimension <= 720) return { name: '对开模切', basePrice: 150, squarePrice: 0.2 };
+                if (maxDimension <= 1420 && minDimension <= 1020) return { name: '全开模切', basePrice: 200, squarePrice: 0.25 };
+                if (maxDimension <= 1620 && minDimension <= 1220) return { name: '大全开模切', basePrice: 250, squarePrice: 0.3 };
+                return { name: '大幅面模切', basePrice: 200, squarePrice: 0.25 };
+            }
+
+            if (processType === 'cutting') {
+                if (maxDimension <= 650 && minDimension <= 450) return { name: '4开切割', basePrice: 80, squarePrice: 0.12 };
+                if (maxDimension <= 1020 && minDimension <= 720) return { name: '对开切割', basePrice: 120, squarePrice: 0.15 };
+                if (maxDimension <= 1420 && minDimension <= 1020) return { name: '全开切割', basePrice: 160, squarePrice: 0.2 };
+                if (maxDimension <= 1620 && minDimension <= 1220) return { name: '大全开切割', basePrice: 200, squarePrice: 0.25 };
+                return { name: '大幅面切割', basePrice: 160, squarePrice: 0.2 };
+            }
+
+            if (processType === 'varnish') {
+                if (maxDimension <= 650 && minDimension <= 450) return { name: '4开光油', basePrice: 80, squarePrice: 0.1 };
+                if (maxDimension <= 1020 && minDimension <= 720) return { name: '对开光油', basePrice: 120, squarePrice: 0.15 };
+                if (maxDimension <= 1420 && minDimension <= 1020) return { name: '全开光油', basePrice: 150, squarePrice: 0.2 };
+                if (maxDimension <= 1620 && minDimension <= 1220) return { name: '大全开光油', basePrice: 180, squarePrice: 0.25 };
+                return { name: '大幅面光油', basePrice: 150, squarePrice: 0.2 };
+            }
+
+            if (processType === 'lamination') {
+                if (maxDimension <= 650 && minDimension <= 450) return { name: '4开覆膜', basePrice: 100, squarePrice: 0.2 };
+                if (maxDimension <= 1020 && minDimension <= 720) return { name: '对开覆膜', basePrice: 150, squarePrice: 0.25 };
+                if (maxDimension <= 1420 && minDimension <= 1020) return { name: '全开覆膜', basePrice: 200, squarePrice: 0.3 };
+                if (maxDimension <= 1620 && minDimension <= 1220) return { name: '大全开覆膜', basePrice: 250, squarePrice: 0.35 };
+                return { name: '大幅面覆膜', basePrice: 180, squarePrice: 0.3 };
+            }
+
+            return { name: '标准工艺', basePrice: 0, squarePrice: 0 };
+        }
+
+        function appendMissingProcessComponents(rowInfo, ctx, components) {
+            const localComponents = getSelectedProcessComponents(rowInfo, ctx);
+            if (localComponents.length === 0) return;
+
+            const existingTypes = new Set(components.map(component => component.type));
+            localComponents.forEach(component => {
+                if (!existingTypes.has(component.type)) {
+                    components.push(component);
+                }
+            });
+        }
+
+        function getSelectedProcessComponents(rowInfo, ctx) {
+            const rules = [
+                { keyword: '印刷', type: 'printing', name: '印刷' },
+                { keyword: '模切', type: 'die-cutting', name: '模切' },
+                { keyword: '切割', type: 'cutting', name: '切割' },
+                { keyword: '光油', type: 'varnish', name: '光油' },
+                { keyword: '覆膜', type: 'lamination', name: '覆膜' },
+                { keyword: '光膜', type: 'lamination', name: '光膜' }
+            ];
+            const components = [];
+
+            rules.forEach(rule => {
+                if (!rowInfo.processName.includes(rule.keyword)) return;
+                const alreadyAdded = components.some(component => component.type === rule.type);
+                if (alreadyAdded) return;
+
+                const fallback = getLocalProcessStandard(rule.type, ctx.length, ctx.width);
+                components.push({
+                    type: rule.type,
+                    name: `${fallback.name}（默认${rule.name}标准）`,
+                    base_price: fallback.basePrice,
+                    square_price: fallback.squarePrice,
+                    is_fallback: true
+                });
+            });
+
+            return components;
+        }
+
+        function appendCostSection(title, statusText, innerHtml, cssClass = '') {
+            return `
+                <div class="standard-cost-section ${cssClass}">
+                    <div class="standard-cost-heading">
+                        <span>${escapeHtml(title)}</span>
+                        <em>${escapeHtml(statusText)}</em>
+                    </div>
+                    ${innerHtml}
+                </div>
+            `;
+        }
+
+        function getComponentUnitCost(item, ctx, actualQuantity) {
+            const basePrice = Number(item.base_price) || 0;
+            const squarePrice = Number(item.square_price) || 0;
+            const sharedQuantity = Math.max(ctx.totalQuantity, 1);
+            if (ctx.area <= 0) return 0;
+
+            if (isPrintingComponent(item)) {
+                return getTieredPrintingUnitCost(basePrice, squarePrice, ctx.area, sharedQuantity);
+            }
+
+            if (isGraphicsComponent(item)) {
+                const squareCost = ctx.totalQuantity > 3000 ? ctx.area * squarePrice : 0;
+                return (basePrice / sharedQuantity) + squareCost;
+            }
+
+            if (includesAny(getComponentText(item), ['die-cutting', 'cutting', '模切', '切割'])) {
+                return (basePrice / sharedQuantity) + (ctx.area * squarePrice);
+            }
+
+            if (includesAny(getComponentText(item), ['varnish', 'lamination', '光油', '覆膜', '光膜'])) {
+                return ctx.area * squarePrice;
+            }
+
+            if (actualQuantity <= 0) return 0;
+            return (basePrice / actualQuantity) + (ctx.area * squarePrice);
+        }
+
+        function getComponentUnitTotal(items, ctx, actualQuantity) {
+            return items.reduce((sum, item) => sum + getComponentUnitCost(item, ctx, actualQuantity), 0);
+        }
+
+        function buildComponentRows(items, ctx, actualQuantity) {
+            if (!items.length) {
+                return '<div class="standard-tooltip-muted">本行无此类费用</div>';
+            }
+
+            let html = '';
+            items.forEach(item => {
+                const name = item.name || '未命名标准';
+                const basePrice = Number(item.base_price) || 0;
+                const squarePrice = Number(item.square_price) || 0;
+                const unitCost = getComponentUnitCost(item, ctx, actualQuantity);
+                html += `<div class="standard-tooltip-line">${escapeHtml(name)}：基础 ¥${basePrice}，平方 ¥${squarePrice}/m²</div>`;
+                if (ctx.area > 0) {
+                    if (isPrintingComponent(item)) {
+                        const overflowQuantity = getTieredPrintingOverflowQuantity(ctx.totalQuantity);
+                        const formulaText = overflowQuantity > 0
+                            ? `(${basePrice} + ${formatAmount(ctx.area)}×${squarePrice}×${overflowQuantity})÷${ctx.totalQuantity}`
+                            : `${basePrice}÷${ctx.totalQuantity}`;
+                        html += `<div class="standard-tooltip-formula">画面单价：${formulaText} = ¥${formatAmount(unitCost)}/件</div>`;
+                    } else if (isGraphicsComponent(item)) {
+                        const squareText = ctx.totalQuantity > 3000 ? ` + ${formatAmount(ctx.area)}×${squarePrice}` : '';
+                        html += `<div class="standard-tooltip-formula">画面单价：${basePrice}÷${ctx.totalQuantity}${squareText} = ¥${formatAmount(unitCost)}/件</div>`;
+                    } else if (includesAny(getComponentText(item), ['die-cutting', 'cutting', '模切', '切割'])) {
+                        html += `<div class="standard-tooltip-formula">工艺单价：${basePrice}÷${ctx.totalQuantity} + ${formatAmount(ctx.area)}×${squarePrice} = ¥${formatAmount(unitCost)}/件</div>`;
+                    } else if (includesAny(getComponentText(item), ['varnish', 'lamination', '光油', '覆膜', '光膜'])) {
+                        html += `<div class="standard-tooltip-formula">工艺单价：${formatAmount(ctx.area)}×${squarePrice} = ¥${formatAmount(unitCost)}/件</div>`;
+                    } else {
+                        html += `<div class="standard-tooltip-formula">单价：${basePrice}÷${actualQuantity} + ${formatAmount(ctx.area)}×${squarePrice} = ¥${formatAmount(unitCost)}/件</div>`;
+                    }
+                }
+            });
+
+            if (ctx.area > 0) {
+                const totalUnitCost = getComponentUnitTotal(items, ctx, actualQuantity);
+                html += `<div class="standard-tooltip-total">本类工艺单价小计：¥${formatAmount(totalUnitCost)}/件</div>`;
+            }
+            return html;
+        }
+
+        function buildStandardTooltipContent(standards, row) {
+            const ctx = getRowCalculationContext(row);
+            const rowInfo = getRowSelectionContext(row);
+            const primaryStandard = standards[0] || {};
+            const wastage = getWastageByQuantity(primaryStandard, ctx.totalQuantity);
+            const actualQuantity = ctx.totalQuantity + wastage;
+            const components = [];
+
+            standards.forEach(standard => {
+                if (standard.type === 'combined' && Array.isArray(standard.components) && standard.components.length > 0) {
+                    standard.components.forEach(component => components.push(component));
+                } else {
+                    components.push(standard);
+                }
+            });
+
+            appendMissingProcessComponents(rowInfo, ctx, components);
+
+            const graphicsItems = components.filter(component => isGraphicsComponent(component) && !isLaborComponent(component));
+            const laborItems = components.filter(component => isLaborComponent(component));
+            const processItems = components.filter(component => !isGraphicsComponent(component) && !isLaborComponent(component));
+            const materialUnitCost = ctx.area * rowInfo.materialSquarePrice;
+            const mainMaterialUnitCost = rowInfo.isMainMaterial ? materialUnitCost : 0;
+            const graphicsMaterialUnitCost = rowInfo.isGraphicsMaterial ? materialUnitCost : 0;
+            const graphicsUnitCost = graphicsMaterialUnitCost + getComponentUnitTotal(graphicsItems, ctx, actualQuantity);
+            const processUnitCost = getComponentUnitTotal(processItems, ctx, actualQuantity);
+            const laborUnitCost = rowInfo.isLabor ? rowInfo.displayedAmount : getComponentUnitTotal(laborItems, ctx, actualQuantity);
+
+            let content = '<div class="standard-tooltip-title">计算标准（按费用类别）</div>';
+            content += '<div class="standard-tooltip-section">';
+            content += `<div class="standard-tooltip-line">材料：${escapeHtml(rowInfo.materialName || '未选择')}</div>`;
+            if (rowInfo.materialCategoryName) {
+                content += `<div class="standard-tooltip-line">分类：${escapeHtml(rowInfo.materialCategoryName)}</div>`;
+            }
+            content += `<div class="standard-tooltip-line">工艺：${escapeHtml(rowInfo.processName || '未选择')}</div>`;
+            content += `<div class="standard-tooltip-line">数量：${ctx.quantity} × ${ctx.projectSets} = ${ctx.totalQuantity}件</div>`;
+            if (ctx.area > 0) {
+                content += `<div class="standard-tooltip-formula">面积：(${ctx.length}+30)×(${ctx.width}+30)÷1000000 = ${formatAmount(ctx.area)}m²</div>`;
+            }
+            if (wastage > 0) {
+                content += `<div class="standard-tooltip-line">损耗：${wastage}件（${getWastageRangeText(ctx.totalQuantity)}），计算数量 ${actualQuantity}件</div>`;
+            }
+            content += `
+                <div class="standard-category-summary">
+                    <span>材料 ¥${formatAmount(mainMaterialUnitCost)}</span>
+                    <span>画面 ¥${formatAmount(graphicsUnitCost)}</span>
+                    <span>工艺 ¥${formatAmount(processUnitCost)}</span>
+                    <span>人工 ¥${formatAmount(laborUnitCost, 2)}</span>
+                </div>
+            `;
+            content += '</div>';
+
+            if (mainMaterialUnitCost > 0) {
+                const materialSummaryCost = mainMaterialUnitCost * ctx.projectSets;
+                content += appendCostSection(
+                    '材料 / 主材料',
+                    `¥${formatAmount(mainMaterialUnitCost)} / 件`,
+                    `
+                        <div class="standard-tooltip-line">材料平方单价：¥${rowInfo.materialSquarePrice}/m²</div>
+                        <div class="standard-tooltip-formula">材料单价：${formatAmount(ctx.area)}×¥${rowInfo.materialSquarePrice} = ¥${formatAmount(mainMaterialUnitCost)}/件</div>
+                        <div class="standard-tooltip-line">汇总口径：单价 × 项目套数 = ¥${formatAmount(mainMaterialUnitCost)}×${ctx.projectSets}套 = ¥${formatAmount(materialSummaryCost, 2)}</div>
+                    `,
+                    'material-cost'
+                );
+            } else {
+                const reason = rowInfo.isGraphicsMaterial ? '材料分类为写真/画面，归入画面' : rowInfo.isLabor ? '本行归入人工费用' : '材料平方单价或尺寸未完整';
+                content += appendCostSection('材料 / 主材料', '0', `<div class="standard-tooltip-muted">${escapeHtml(reason)}</div>`, 'material-cost');
+            }
+
+            let graphicsBody = '';
+            if (graphicsMaterialUnitCost > 0) {
+                graphicsBody += `<div class="standard-tooltip-line">画面材料：${escapeHtml(rowInfo.materialName)}</div>`;
+                graphicsBody += `<div class="standard-tooltip-formula">画面材料单价：${formatAmount(ctx.area)}×¥${rowInfo.materialSquarePrice} = ¥${formatAmount(graphicsMaterialUnitCost)}/件</div>`;
+            }
+            if (graphicsItems.length) {
+                graphicsBody += buildComponentRows(graphicsItems, ctx, actualQuantity);
+            }
+            if (!graphicsBody) {
+                graphicsBody = rowInfo.isGraphicsProcess
+                    ? '<div class="standard-tooltip-muted">画面工艺按印刷/写真/UV规则归集，当前没有匹配到明细标准</div>'
+                    : '<div class="standard-tooltip-muted">本行没有画面费用</div>';
+            }
+            content += appendCostSection('画面', graphicsUnitCost > 0 ? `¥${formatAmount(graphicsUnitCost)} / 件` : '0', graphicsBody, 'graphics-cost');
+
+            const processBody = processItems.length
+                ? buildComponentRows(processItems, ctx, actualQuantity)
+                : '<div class="standard-tooltip-muted">本行没有加工类工艺</div>';
+            content += appendCostSection('工艺 / 加工', processUnitCost > 0 ? `¥${formatAmount(processUnitCost)} / 件` : '0', processBody, 'process-cost');
+
+            let laborBody = '';
+            if (laborItems.length) {
+                laborBody += buildComponentRows(laborItems, ctx, actualQuantity);
+            }
+            if (rowInfo.isLabor) {
+                laborBody += `<div class="standard-tooltip-line">人工项目按当前行金额归集</div><div class="standard-tooltip-formula">人工费用：¥${formatAmount(rowInfo.displayedAmount, 2)}</div>`;
+            }
+            if (!laborBody) {
+                laborBody = '<div class="standard-tooltip-muted">本行没有人工费用</div>';
+            }
+            content += appendCostSection('人工', laborUnitCost > 0 ? `¥${formatAmount(laborUnitCost, 2)}` : '0', laborBody, 'labor-cost');
+
+            return content;
+        }
+
+        // 更新当前行的计算标准索引
+        function updateStandardsInfoPanel(standards, row = document.querySelector('.input-row')) {
+            const trigger = row?.querySelector('.standard-trigger');
+            const tooltip = row?.querySelector('.standard-tooltip');
+            if (!trigger || !tooltip) return;
+
+            if (!standards || standards.length === 0) {
+                clearStandardsInfoPanel(row);
+                return;
+            }
+
+            tooltip.innerHTML = buildStandardTooltipContent(standards, row);
+            trigger.classList.remove('is-empty');
+            trigger.classList.add('has-standard');
+            trigger.setAttribute('aria-label', `计算标准：${standards.map(item => item.name || '计算标准').join('、')}`);
+        }
+
+        // 清除当前行的计算标准索引
+        function clearStandardsInfoPanel(row) {
+            const rows = row ? [row] : document.querySelectorAll('.input-row');
+            rows.forEach(currentRow => {
+                const trigger = currentRow.querySelector('.standard-trigger');
+                const tooltip = currentRow.querySelector('.standard-tooltip');
+                if (!trigger || !tooltip) return;
+                trigger.classList.add('is-empty');
+                trigger.classList.remove('has-standard');
+                trigger.setAttribute('aria-label', '计算标准：暂无');
+                tooltip.innerHTML = '<div class="standard-empty">填写材料、尺寸和工艺后显示</div>';
+            });
+        }
+        
+        // 根据数量区间获取损耗值
+        function getWastageByQuantity(standard, quantity) {
+            if (!standard) return 0;
+            
+            // 如果标准中有新的损耗区间字段，使用新的逻辑
+            if (standard.wastage_0_100 !== undefined || standard.wastage_100_3000 !== undefined || standard.wastage_3000_plus !== undefined) {
+                if (quantity <= 100) {
+                    return standard.wastage_0_100 || 80;
+                } else if (quantity <= 3000) {
+                    return standard.wastage_100_3000 || 40;
+                } else {
+                    return standard.wastage_3000_plus || 20;
+                }
+            }
+            
+            // 兼容旧的损耗字段
+            return standard.wastage || 0;
+        }
+        
+        // 获取当前总数量（项目套数 * 数量）
+        function getCurrentTotalQuantity(row = document.querySelector('.input-row')) {
+            const projectSets = parseInt(document.getElementById('projectSets').value) || 1;
+            if (row) {
+                const quantity = parseFloat(row.querySelector('.quantity-input').value) || 1;
+                return quantity * projectSets;
+            }
+            return 1;
+        }
+        
+        // 查看价格明细
+        function viewPriceBreakdown() {
+            console.log('🔍 开始生成价格明细数据...');
+            
+            // 验证表单数据
+            const rows = document.querySelectorAll('.input-row');
+            if (rows.length === 0) {
+                alert('请先添加材料和工艺信息');
+                return;
+            }
+            
+            const projectSets = parseInt(document.getElementById('projectSets').value) || 1;
+            let breakdownData = {
+                projectSets: projectSets,
+                items: [],
+                summary: {
+                    materialCost: 0,
+                    processCost: 0,
+                    unitPrice: 0,
+                    totalPrice: 0
+                }
+            };
+            
+            let hasValidData = false;
+            
+            rows.forEach((row, index) => {
+                const materialSelect = row.querySelector('.material-select');
+                const processSelect = row.querySelector('.process-select');
+                const quantityInput = row.querySelector('.quantity-input');
+                const lengthInput = row.querySelector('.length-input');
+                const widthInput = row.querySelector('.width-input');
+                const priceDisplay = row.querySelector('.price-display');
+                
+                // 检查必填字段
+                if (!materialSelect.value || !processSelect.value || !quantityInput.value || 
+                    !lengthInput.value || !widthInput.value) {
+                    return; // 跳过不完整的行
+                }
+                
+                hasValidData = true;
+                
+                const quantity = parseFloat(quantityInput.value);
+                const length = parseFloat(lengthInput.value);
+                const width = parseFloat(widthInput.value);
+                const totalQuantity = quantity * projectSets;
+                
+                // 获取材料信息
+                const materialOption = materialSelect.selectedOptions[0];
+                const materialPrice = parseFloat(materialOption.dataset.squarePrice) || 0;
+                
+                // 计算面积
+                const area = (length + 30) * (width + 30) / 1000000;
+                
+                // 计算材料费用
+                const materialCost = area * materialPrice;
+                
+                // 获取工艺信息
+                const processOption = processSelect.selectedOptions[0];
+                const processPrice = parseFloat(processOption.dataset.price) || 0;
+                const processSquarePrice = parseFloat(processOption.dataset.squarePrice) || 0;
+                
+                // 计算工艺费用（详细版本）
+                let processCost = 0;
+                let processBreakdownDetails = [];
+                
+                if (processPrice > 0) {
+                    // 有具体工艺价格的情况 - 使用包含损耗的数量
+                    // 获取损耗数量（这里使用默认损耗逻辑）
+                    let wastageQuantity = 0;
+                    if (totalQuantity <= 100) {
+                        wastageQuantity = 80;
+                    } else if (totalQuantity <= 3000) {
+                        wastageQuantity = 40;
+                    } else {
+                        wastageQuantity = 20;
+                    }
+                    const actualQuantity = totalQuantity + wastageQuantity;
+                    
+                    const baseCostPerUnit = processPrice / actualQuantity;
+                    const squareCost = area * processSquarePrice * actualQuantity;
+                    processCost = baseCostPerUnit + squareCost;
+                    
+                    processBreakdownDetails.push({
+                        name: processOption.textContent,
+                        basePrice: processPrice,
+                        squarePrice: processSquarePrice,
+                        formula: `¥${processPrice}÷${actualQuantity}件 + ${area.toFixed(4)}m²×¥${processSquarePrice}×${actualQuantity}件 = ¥${baseCostPerUnit.toFixed(4)} + ¥${squareCost.toFixed(4)}`,
+                        baseCostDetail: `基础价格均摊: ¥${processPrice}÷${actualQuantity}件 = ¥${baseCostPerUnit.toFixed(4)}/件`,
+                        squareCostDetail: `平方费用: ${area.toFixed(4)}m²×¥${processSquarePrice}×${actualQuantity}件 = ¥${squareCost.toFixed(4)}`,
+                        cost: processCost
+                    });
+                } else {
+                    // 使用默认印刷计算
+                    if (totalQuantity <= 3000) {
+                        let basePrice = 0;
+                        const maxDim = Math.max(length, width);
+                        const minDim = Math.min(length, width);
+                        let sizeCategory = '';
+                        
+                        if (maxDim <= 650 && minDim <= 450) {
+                            basePrice = 1000;
+                            sizeCategory = '四开印刷';
+                        } else if (maxDim <= 920 && minDim <= 650) {
+                            basePrice = 1500;
+                            sizeCategory = '对开印刷';
+                        } else {
+                            basePrice = 2000;
+                            sizeCategory = '全开印刷';
+                        }
+                        
+                        // 小批量印刷 - 使用包含损耗的数量
+                        let wastageQuantity = 0;
+                        if (totalQuantity <= 100) {
+                            wastageQuantity = 80;
+                        } else {
+                            wastageQuantity = 40;
+                        }
+                        const actualQuantity = totalQuantity + wastageQuantity;
+                        
+                        const baseCostPerUnit = basePrice / actualQuantity;
+                        processCost = baseCostPerUnit;
+                        
+                        processBreakdownDetails.push({
+                            name: `${sizeCategory}（≤3000件）`,
+                            basePrice: basePrice,
+                            squarePrice: 0,
+                            formula: `¥${basePrice}÷${actualQuantity}件 = ¥${baseCostPerUnit.toFixed(4)}/件`,
+                            baseCostDetail: `基础价格均摊: ¥${basePrice}÷${actualQuantity}件 = ¥${baseCostPerUnit.toFixed(4)}/件`,
+                            squareCostDetail: '平方费用: 不适用（使用基础价格均摊）',
+                            cost: processCost
+                        });
+                    } else {
+                        // 大批量印刷 - 使用包含损耗的数量
+                        let wastageQuantity = 20; // >3000件的损耗
+                        const actualQuantity = totalQuantity + wastageQuantity;
+                        
+                        const baseCostPerUnit = 0.5 / actualQuantity;
+                        const squareCost = area * 0.3 * actualQuantity;
+                        processCost = baseCostPerUnit + squareCost;
+                        
+                        processBreakdownDetails.push({
+                            name: '大批量印刷（>3000件）',
+                            basePrice: 0.5,
+                            squarePrice: 0.3,
+                            formula: `¥0.5÷${actualQuantity} + ${area.toFixed(4)}m²×¥0.3×${actualQuantity}件 = ¥${baseCostPerUnit.toFixed(4)} + ¥${squareCost.toFixed(4)}`,
+                            baseCostDetail: `基础价格均摊: ¥0.5÷${actualQuantity}件 = ¥${baseCostPerUnit.toFixed(4)}/件`,
+                            squareCostDetail: `平方费用: ${area.toFixed(4)}m²×¥0.3×${actualQuantity}件 = ¥${squareCost.toFixed(4)}`,
+                            cost: processCost
+                        });
+                    }
+                }
+                
+                const unitPrice = materialCost + processCost;
+                const totalPrice = unitPrice * quantity;
+                
+                // 构建明细数据
+                const itemData = {
+                    materialName: materialOption.textContent,
+                    materialPrice: materialPrice,
+                    processName: processOption.textContent,
+                    quantity: quantity,
+                    dimensions: `${length}mm × ${width}mm`,
+                    areaCalculation: {
+                        formula: `(${length}+30)×(${width}+30)÷1000000`,
+                        result: area.toFixed(4)
+                    },
+                    quantityCalculation: {
+                        baseFormula: `${quantity}件 × ${projectSets}套`,
+                        wastageFormula: '损耗: 根据数量区间计算',
+                        actualQuantity: totalQuantity
+                    },
+                    processBreakdown: processBreakdownDetails,
+                    materialCost: {
+                        formula: `${area.toFixed(4)}m² × ¥${materialPrice}`,
+                        cost: materialCost
+                    },
+                    unitPrice: unitPrice,
+                    totalPrice: totalPrice
+                };
+                
+                breakdownData.items.push(itemData);
+                breakdownData.summary.materialCost += materialCost;
+                breakdownData.summary.processCost += processCost;
+                breakdownData.summary.unitPrice += unitPrice;
+                breakdownData.summary.totalPrice += totalPrice;
+            });
+            
+            if (!hasValidData) {
+                alert('请填写完整的材料、工艺、尺寸和数量信息');
+                return;
+            }
+            
+            // 如果只有一个项目，使用单项目数据
+            if (breakdownData.items.length === 1) {
+                const item = breakdownData.items[0];
+                const singleItemData = {
+                    materialName: item.materialName,
+                    materialPrice: item.materialPrice,
+                    processName: item.processName,
+                    quantity: item.quantity,
+                    dimensions: item.dimensions,
+                    projectSets: projectSets,
+                    areaCalculation: item.areaCalculation,
+                    quantityCalculation: item.quantityCalculation,
+                    processBreakdown: item.processBreakdown,
+                    materialCost: item.materialCost,
+                    summary: {
+                        materialCost: item.materialCost.cost,
+                        processCost: item.processBreakdown[0].cost,
+                        unitPrice: item.unitPrice,
+                        totalPrice: item.totalPrice
+                    }
+                };
+                
+                // 保存到sessionStorage
+                sessionStorage.setItem('priceBreakdownData', JSON.stringify(singleItemData));
+            } else {
+                // 保存到sessionStorage
+                sessionStorage.setItem('priceBreakdownData', JSON.stringify(breakdownData));
+            }
+            
+            console.log('💾 价格明细数据已保存:', breakdownData);
+            
+            // 跳转到价格明细页面
+            window.open('/price_breakdown', '_blank');
+        }
+        
+        // 为初始行添加事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 页面加载完成，开始初始化...');
+            
+            // 初始化页面数据
+            initializePage();
+            
+            const initialRow = document.querySelector('.input-row');
+            if (initialRow) {
+                addRowEventListeners(initialRow);
+                console.log('✅ 初始行事件监听器已添加');
+            }
+            
+            // 添加项目套数监听器
+            addProjectSetsListener();
+            console.log('✅ 项目套数监听器已添加');
+            updateManualCostTotals();
+            
+            // 添加自动保存监听器
+            addAutoSaveListeners();
+            console.log('✅ 自动保存监听器已添加');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>材料库管理 - 成本分析与报价系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            transition: color 0.3s;
+        }
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .btn-action {
+            margin: 0 2px;
+        }
+        .price-display {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .badge {
+            font-size: 0.8em;
+        }
+        .category-section {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .category-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        .category-section .table {
+            margin-bottom: 0;
+        }
+        .category-section:last-child {
+            margin-bottom: 0 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>成本分析与报价系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" title="切换导航菜单">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers"><i class="fas fa-users me-1"></i>客户管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/materials"><i class="fas fa-boxes me-1"></i>材料库</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes"><i class="fas fa-cogs me-1"></i>工艺库</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pricing_standards"><i class="fas fa-ruler me-1"></i>判定标准</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotation_new"><i class="fas fa-file-invoice me-1"></i>报价单</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-boxes me-3"></i>材料库管理</h1>
+            <p class="mb-0">管理产品材料信息，包括规格、单价、供应商等详细信息</p>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container my-4">
+        <!-- 操作按钮 -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#materialModal" onclick="openAddModal()">
+                    <i class="fas fa-plus me-2"></i>添加材料
+                </button>
+                <button class="btn btn-info ms-2" data-bs-toggle="modal" data-bs-target="#categoryModal" onclick="loadCategoriesForModal()">
+                    <i class="fas fa-tags me-2"></i>管理分类
+                </button>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="categoryFilter" onchange="filterByCategory()" title="按分类筛选材料">
+                    <option value="">所有分类</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索材料名称或规格..." onkeypress="handleSearchKeyPress(event)">
+                    <button class="btn btn-outline-secondary" type="button" onclick="searchMaterials()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 材料列表 -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <div id="materialsByCategory">
+                    <!-- 按分类分组的材料数据将通过JavaScript动态加载 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 空状态提示 -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-boxes fa-5x text-muted mb-3"></i>
+            <h4 class="text-muted">暂无材料数据</h4>
+            <p class="text-muted">点击上方"添加材料"按钮开始添加材料信息</p>
+        </div>
+    </div>
+
+    <!-- 材料信息模态框 -->
+    <div class="modal fade" id="materialModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-box me-2"></i>添加材料
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="materialForm">
+                        <input type="hidden" id="materialId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="materialName" class="form-label">材料名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="materialName" required placeholder="请输入材料名称">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="categoryId" class="form-label">材料分类</label>
+                                <select class="form-select" id="categoryId" title="选择材料分类">
+                                    <option value="">请选择分类</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="materialSpecification" class="form-label">规格型号</label>
+                                <input type="text" class="form-control" id="materialSpecification" placeholder="请输入材料规格">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="materialUnit" class="form-label">单位</label>
+                                <input type="text" class="form-control" id="materialUnit" placeholder="如：个、米、平方米等">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="materialUnitPrice" class="form-label">基础单价 (元)</label>
+                                <input type="number" class="form-control" id="materialUnitPrice" step="0.01" min="0" placeholder="请输入单价">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="materialSquarePrice" class="form-label">平方单价 (元/㎡)</label>
+                                <input type="number" class="form-control" id="materialSquarePrice" step="0.01" min="0" placeholder="请输入平方价格">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="materialSupplier" class="form-label">供应商</label>
+                                <input type="text" class="form-control" id="materialSupplier" placeholder="请输入供应商名称">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="materialDescription" class="form-label">备注说明</label>
+                            <textarea class="form-control" id="materialDescription" rows="3" placeholder="可填写材料的详细描述、技术参数等信息"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="saveMaterial()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除材料 <strong id="deleteMaterialName"></strong> 吗？</p>
+                    <p class="text-muted small">此操作不可撤销，请谨慎操作。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                        <i class="fas fa-trash me-1"></i>确认删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分类管理模态框 -->
+    <div class="modal fade" id="categoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-tags me-2"></i>材料分类管理
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="newCategoryName" placeholder="输入新分类名称">
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-success" onclick="addCategory()">
+                                <i class="fas fa-plus me-1"></i>添加分类
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>分类名称</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="emptyCategoryState" class="text-center py-4" style="display: none;">
+                        <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">暂无分类</h5>
+                        <p class="text-muted">请添加第一个材料分类</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentMaterialId = null;
+        let deleteMaterialId = null;
+        let editingCategoryId = null;
+        let allMaterials = [];
+        let allCategories = [];
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMaterials();
+            loadCategories();
+        });
+
+        // 加载材料列表
+        function loadMaterials() {
+            fetch('/api/materials')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    allMaterials = data;
+                    displayMaterials(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('加载材料列表失败', 'danger');
+                });
+        }
+
+        // 显示材料列表
+        function displayMaterials(materials) {
+            const container = document.getElementById('materialsByCategory');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (materials.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            // 按分类分组材料
+            const groupedMaterials = {};
+            materials.forEach(material => {
+                const categoryName = material.category_name || '未分类';
+                if (!groupedMaterials[categoryName]) {
+                    groupedMaterials[categoryName] = [];
+                }
+                groupedMaterials[categoryName].push(material);
+            });
+            
+            // 生成分组显示的HTML
+            let html = '';
+            Object.keys(groupedMaterials).sort().forEach(categoryName => {
+                const categoryMaterials = groupedMaterials[categoryName];
+                
+                html += `
+                    <div class="category-section mb-4">
+                        <div class="category-header bg-light p-3 border-start border-primary border-4">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tag me-2 text-primary"></i>
+                                ${categoryName}
+                                <span class="badge bg-primary ms-2">${categoryMaterials.length}</span>
+                            </h5>
+                        </div>
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>材料名称</th>
+                                    <th>规格型号</th>
+                                    <th>单位</th>
+                                    <th>基础单价</th>
+                                    <th>平方单价</th>
+                                    <th>供应商</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                categoryMaterials.forEach(material => {
+                    const unitPrice = parseFloat(material.unit_price) || 0;
+                    const squarePrice = parseFloat(material.square_price) || 0;
+                    const createdAt = new Date(material.created_at).toLocaleDateString();
+                    
+                    html += `
+                        <tr>
+                            <td>${material.id}</td>
+                            <td><strong>${material.name}</strong></td>
+                            <td>${material.specification || '-'}</td>
+                            <td>${material.unit || '-'}</td>
+                            <td><span class="price-display">¥${unitPrice.toFixed(2)}</span></td>
+                            <td><span class="price-display">¥${squarePrice.toFixed(2)}</span></td>
+                            <td>${material.supplier || '-'}</td>
+                            <td>${createdAt}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary btn-action" onclick="editMaterial(${material.id})" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteMaterial(${material.id}, '${material.name}')" title="删除">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // 加载分类列表
+        function loadCategories() {
+            fetch('/api/material_categories')
+                .then(response => response.json())
+                .then(data => {
+                    allCategories = data;
+                    updateCategorySelects();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // 更新分类选择框
+        function updateCategorySelects() {
+            const categorySelect = document.getElementById('categoryId');
+            const categoryFilter = document.getElementById('categoryFilter');
+            
+            // 更新材料表单中的分类选择
+            categorySelect.innerHTML = '<option value="">请选择分类</option>';
+            allCategories.forEach(category => {
+                categorySelect.innerHTML += `<option value="${category.id}">${escapeHtml(category.name)}</option>`;
+            });
+            
+            // 更新筛选器中的分类选择
+            categoryFilter.innerHTML = '<option value="">所有分类</option>';
+            allCategories.forEach(category => {
+                categoryFilter.innerHTML += `<option value="${category.id}">${escapeHtml(category.name)}</option>`;
+            });
+        }
+
+        // 搜索材料
+        function searchMaterials() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredMaterials = allMaterials.filter(material => 
+                material.name.toLowerCase().includes(searchTerm) ||
+                (material.specification && material.specification.toLowerCase().includes(searchTerm))
+            );
+            displayMaterials(filteredMaterials);
+        }
+
+        // 搜索框回车事件
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchMaterials();
+            }
+        }
+
+        // 按分类筛选
+        function filterByCategory() {
+            const categoryId = document.getElementById('categoryFilter').value;
+            let filteredMaterials = allMaterials;
+            
+            if (categoryId) {
+                filteredMaterials = allMaterials.filter(material => 
+                    material.category_id == categoryId
+                );
+            }
+            
+            displayMaterials(filteredMaterials);
+        }
+
+        // 打开添加模态框
+        function openAddModal() {
+            currentMaterialId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-box me-2"></i>添加材料';
+            document.getElementById('materialForm').reset();
+            document.getElementById('materialId').value = '';
+        }
+
+        // 编辑材料
+        function editMaterial(id) {
+            const material = allMaterials.find(m => m.id === id);
+            if (material) {
+                currentMaterialId = id;
+                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑材料';
+                document.getElementById('materialId').value = material.id;
+                document.getElementById('materialName').value = material.name;
+                document.getElementById('materialSpecification').value = material.specification || '';
+                document.getElementById('materialUnit').value = material.unit || '';
+                document.getElementById('materialUnitPrice').value = material.unit_price || '';
+                document.getElementById('materialSquarePrice').value = material.square_price || '';
+                document.getElementById('materialSupplier').value = material.supplier || '';
+                document.getElementById('categoryId').value = material.category_id || '';
+                document.getElementById('materialDescription').value = material.description || '';
+                
+                new bootstrap.Modal(document.getElementById('materialModal')).show();
+            }
+        }
+
+        // 保存材料
+        function saveMaterial() {
+            const formData = {
+                name: document.getElementById('materialName').value,
+                specification: document.getElementById('materialSpecification').value,
+                unit: document.getElementById('materialUnit').value,
+                unit_price: parseFloat(document.getElementById('materialUnitPrice').value) || 0,
+                square_price: parseFloat(document.getElementById('materialSquarePrice').value) || 0,
+                supplier: document.getElementById('materialSupplier').value,
+                category_id: document.getElementById('categoryId').value || null,
+                description: document.getElementById('materialDescription').value
+            };
+
+            if (!formData.name.trim()) {
+                showAlert('请输入材料名称', 'warning');
+                return;
+            }
+
+            const url = currentMaterialId ? `/api/materials/${currentMaterialId}` : '/api/materials';
+            const method = currentMaterialId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('materialModal')).hide();
+                loadMaterials();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('保存失败', 'danger');
+            });
+        }
+
+        // 删除材料
+        function deleteMaterial(id, name) {
+            deleteMaterialId = id;
+            document.getElementById('deleteMaterialName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        // 确认删除
+        function confirmDelete() {
+            if (deleteMaterialId) {
+                fetch(`/api/materials/${deleteMaterialId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showAlert(data.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                    loadMaterials();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('删除失败', 'danger');
+                });
+            }
+        }
+
+        // 加载分类到模态框
+        function loadCategoriesForModal() {
+            loadCategoriesInModal();
+        }
+
+        // 在模态框中加载分类
+        function loadCategoriesInModal() {
+            fetch('/api/material_categories')
+                .then(response => response.json())
+                .then(data => {
+                    allCategories = data;
+                    updateCategorySelects();
+                    displayCategoriesInModal(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // 在模态框中显示分类
+        function displayCategoriesInModal(categories) {
+            const tbody = document.getElementById('categoryTableBody');
+            const emptyState = document.getElementById('emptyCategoryState');
+            
+            if (categories.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = categories.map(category => {
+                const isEditing = editingCategoryId === category.id;
+                const categoryName = escapeHtml(category.name);
+                const createdAt = new Date(category.created_at).toLocaleDateString();
+                
+                return `
+                <tr>
+                    <td>${category.id}</td>
+                    <td>
+                        ${isEditing ? `
+                            <input type="text"
+                                   class="form-control form-control-sm"
+                                   id="editCategoryName-${category.id}"
+                                   value="${categoryName}"
+                                   onkeydown="handleCategoryEditKey(event, ${category.id})">
+                        ` : categoryName}
+                    </td>
+                    <td>${createdAt}</td>
+                    <td>
+                        ${isEditing ? `
+                            <button class="btn btn-sm btn-success me-1" onclick="saveCategoryEdit(${category.id})" title="保存">
+                                <i class="fas fa-save"></i> 保存
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="cancelCategoryEdit()" title="取消">
+                                <i class="fas fa-times"></i> 取消
+                            </button>
+                        ` : `
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editCategory(${category.id})" title="编辑名称">
+                                <i class="fas fa-edit"></i> 编辑
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory(${category.id})" title="删除">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                        `}
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // 添加分类
+        function addCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            if (!name) {
+                showAlert('请输入分类名称', 'warning');
+                return;
+            }
+
+            fetch('/api/material_categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: name })
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || '添加分类失败');
+                }
+                return data;
+            })
+            .then(data => {
+                showAlert(data.message, 'success');
+                document.getElementById('newCategoryName').value = '';
+                loadCategories();
+                loadCategoriesInModal();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert(error.message || '添加分类失败', 'danger');
+            });
+        }
+
+        // 编辑分类名称
+        function editCategory(id) {
+            editingCategoryId = id;
+            displayCategoriesInModal(allCategories);
+            setTimeout(() => {
+                const input = document.getElementById(`editCategoryName-${id}`);
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            }, 0);
+        }
+
+        function cancelCategoryEdit() {
+            editingCategoryId = null;
+            displayCategoriesInModal(allCategories);
+        }
+
+        function handleCategoryEditKey(event, id) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                saveCategoryEdit(id);
+            }
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                cancelCategoryEdit();
+            }
+        }
+
+        function saveCategoryEdit(id) {
+            const input = document.getElementById(`editCategoryName-${id}`);
+            const category = allCategories.find(item => item.id === id);
+            const name = input ? input.value.trim() : '';
+            
+            if (!name) {
+                showAlert('请输入分类名称', 'warning');
+                return;
+            }
+            
+            fetch(`/api/material_categories/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    description: category ? (category.description || '') : ''
+                })
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || '分类更新失败');
+                }
+                return data;
+            })
+            .then(data => {
+                showAlert(data.message, 'success');
+                editingCategoryId = null;
+                loadCategories();
+                loadCategoriesInModal();
+                loadMaterials();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert(error.message || '分类更新失败', 'danger');
+            });
+        }
+
+        // 删除分类
+        function deleteCategory(id) {
+            const category = allCategories.find(item => item.id === id);
+            const name = category ? category.name : '';
+            if (confirm(`确定要删除分类 "${name}" 吗？`)) {
+                fetch(`/api/material_categories/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(async response => {
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.error || '删除分类失败');
+                    }
+                    return data;
+                })
+                .then(data => {
+                    showAlert(data.message, 'success');
+                    loadCategories();
+                    loadCategoriesInModal();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert(error.message || '删除分类失败', 'danger');
+                });
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

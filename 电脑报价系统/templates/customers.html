@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户管理 - 报价单管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .btn-action {
+            margin: 2px;
+        }
+        .search-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .customer-card {
+            border-left: 4px solid #667eea;
+        }
+        .customer-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .modal-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .stats-card {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .customer-info {
+            font-size: 0.9rem;
+        }
+        .badge-custom {
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>报价单管理系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" title="切换导航菜单">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/customers">
+                            <i class="fas fa-users me-1"></i>客户管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/materials">
+                            <i class="fas fa-boxes me-1"></i>材料库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/processes">
+                            <i class="fas fa-cogs me-1"></i>工艺库
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pricing_standards">
+                            <i class="fas fa-ruler me-1"></i>判定标准
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quotations">
+                            <i class="fas fa-file-invoice-dollar me-1"></i>报价单
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0">
+                        <i class="fas fa-users me-3"></i>客户管理
+                    </h1>
+                    <p class="mb-0 mt-2">管理您的客户信息，建立良好的客户关系</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#customerModal" onclick="openAddCustomerModal()">
+                        <i class="fas fa-plus me-2"></i>添加客户
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-4">
+        <!-- 统计信息 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <h3 class="mb-0" id="totalCustomers">0</h3>
+                        <p class="mb-0">总客户数</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-invoice-dollar fa-2x mb-2"></i>
+                        <h3 class="mb-0" id="totalQuotations">0</h3>
+                        <p class="mb-0">总报价单数</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                        <h3 class="mb-0" id="newCustomersThisMonth">0</h3>
+                        <p class="mb-0">本月新增</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star fa-2x mb-2"></i>
+                        <h3 class="mb-0" id="activeCustomers">0</h3>
+                        <p class="mb-0">活跃客户</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 搜索和筛选 -->
+        <div class="search-box">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="searchInput" placeholder="搜索客户姓名、公司或电话..." onkeyup="searchCustomers()">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="sortBy" onchange="loadCustomers()" title="选择排序方式">
+                        <option value="created_at">按创建时间排序</option>
+                        <option value="name">按姓名排序</option>
+                        <option value="company">按公司排序</option>
+                        <option value="quotation_count">按报价单数量排序</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="viewMode" id="cardView" checked onchange="toggleView('card')" title="卡片视图">
+                        <label class="btn btn-outline-primary" for="cardView">
+                            <i class="fas fa-th-large"></i> 卡片
+                        </label>
+                        <input type="radio" class="btn-check" name="viewMode" id="tableView" onchange="toggleView('table')" title="表格视图">
+                        <label class="btn btn-outline-primary" for="tableView">
+                            <i class="fas fa-list"></i> 列表
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 客户列表 - 卡片视图 -->
+        <div id="cardViewContainer">
+            <div class="row" id="customersGrid">
+                <!-- 客户卡片将通过JavaScript动态加载 -->
+            </div>
+        </div>
+
+        <!-- 客户列表 - 表格视图 -->
+        <div id="tableViewContainer" style="display: none;">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>客户信息</th>
+                                    <th>联系方式</th>
+                                    <th>公司</th>
+                                    <th>报价单数</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customersTable">
+                                <!-- 客户数据将通过JavaScript动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 空状态 -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-users fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">暂无客户信息</h4>
+            <p class="text-muted">点击上方"添加客户"按钮开始添加您的第一个客户</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerModal" onclick="openAddCustomerModal()">
+                <i class="fas fa-plus me-2"></i>添加客户
+            </button>
+        </div>
+    </div>
+
+    <!-- 客户模态框 -->
+    <div class="modal fade" id="customerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customerModalTitle">
+                        <i class="fas fa-plus me-2"></i>添加客户
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customerForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="customerName" class="form-label">客户姓名 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="customerName" required placeholder="请输入客户姓名">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="customerPhone" class="form-label">联系电话 <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="customerPhone" required placeholder="请输入联系电话">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="customerEmail" class="form-label">邮箱地址</label>
+                                <input type="email" class="form-control" id="customerEmail" placeholder="请输入邮箱地址">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="customerCompany" class="form-label">公司名称</label>
+                                <input type="text" class="form-control" id="customerCompany" placeholder="请输入公司名称">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerAddress" class="form-label">联系地址</label>
+                            <textarea class="form-control" id="customerAddress" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerNotes" class="form-label">备注信息</label>
+                            <textarea class="form-control" id="customerNotes" rows="3" placeholder="客户偏好、特殊要求等..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveCustomer()">
+                        <i class="fas fa-save me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteCustomerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>确认删除
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除这个客户吗？</p>
+                    <p class="text-muted small">删除客户将同时删除该客户的所有报价单，此操作不可撤销。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>取消
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteCustomer()">
+                        <i class="fas fa-trash me-1"></i>确认删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let customers = [];
+        let currentCustomerId = null;
+        let deleteCustomerId = null;
+        let currentView = 'card';
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCustomers();
+            loadStats();
+        });
+
+        // 加载客户列表
+        function loadCustomers() {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            fetch(`/api/customers?sort_by=${sortBy}`)
+                .then(response => response.json())
+                .then(data => {
+                    customers = data;
+                    displayCustomers(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('加载客户列表失败', 'danger');
+                });
+        }
+
+        // 加载统计信息
+        function loadStats() {
+            fetch('/api/customers/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalCustomers').textContent = data.total_customers || 0;
+                    document.getElementById('totalQuotations').textContent = data.total_quotations || 0;
+                    document.getElementById('newCustomersThisMonth').textContent = data.new_customers_this_month || 0;
+                    document.getElementById('activeCustomers').textContent = data.active_customers || 0;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // 显示客户列表
+        function displayCustomers(customerList) {
+            if (customerList.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('cardViewContainer').style.display = 'none';
+                document.getElementById('tableViewContainer').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+            
+            if (currentView === 'card') {
+                displayCardView(customerList);
+            } else {
+                displayTableView(customerList);
+            }
+        }
+
+        // 显示卡片视图
+        function displayCardView(customerList) {
+            const grid = document.getElementById('customersGrid');
+            grid.innerHTML = customerList.map(customer => {
+                const initials = customer.name.substring(0, 2).toUpperCase();
+                const quotationCount = customer.quotation_count || 0;
+                
+                return `
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card customer-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="customer-avatar me-3">
+                                        ${initials}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title mb-1">${customer.name}</h5>
+                                        <p class="text-muted mb-0 customer-info">${customer.company || '个人客户'}</p>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="editCustomer(${customer.id})"><i class="fas fa-edit me-2"></i>编辑</a></li>
+                                            <li><a class="dropdown-item" href="/quotations/new?customer_id=${customer.id}"><i class="fas fa-plus me-2"></i>新建报价单</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="deleteCustomer(${customer.id})"><i class="fas fa-trash me-2"></i>删除</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="customer-info">
+                                    <p class="mb-1"><i class="fas fa-phone me-2 text-muted"></i>${customer.phone}</p>
+                                    ${customer.email ? `<p class="mb-1"><i class="fas fa-envelope me-2 text-muted"></i>${customer.email}</p>` : ''}
+                                    ${customer.address ? `<p class="mb-1"><i class="fas fa-map-marker-alt me-2 text-muted"></i>${customer.address}</p>` : ''}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="badge bg-primary badge-custom">
+                                        <i class="fas fa-file-invoice-dollar me-1"></i>${quotationCount} 个报价单
+                                    </span>
+                                    <small class="text-muted">${new Date(customer.created_at).toLocaleDateString()}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 显示表格视图
+        function displayTableView(customerList) {
+            const table = document.getElementById('customersTable');
+            table.innerHTML = customerList.map(customer => {
+                const quotationCount = customer.quotation_count || 0;
+                
+                return `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="customer-avatar me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+                                    ${customer.name.substring(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                    <strong>${customer.name}</strong>
+                                    ${customer.notes ? `<br><small class="text-muted">${customer.notes.substring(0, 50)}${customer.notes.length > 50 ? '...' : ''}</small>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="customer-info">
+                                <div><i class="fas fa-phone me-1"></i>${customer.phone}</div>
+                                ${customer.email ? `<div><i class="fas fa-envelope me-1"></i>${customer.email}</div>` : ''}
+                            </div>
+                        </td>
+                        <td>${customer.company || '-'}</td>
+                        <td>
+                            <span class="badge bg-primary">${quotationCount}</span>
+                        </td>
+                        <td>${new Date(customer.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary btn-action" onclick="editCustomer(${customer.id})" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <a href="/quotations/new?customer_id=${customer.id}" class="btn btn-sm btn-outline-success btn-action" title="新建报价单">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteCustomer(${customer.id})" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 切换视图模式
+        function toggleView(viewMode) {
+            currentView = viewMode;
+            
+            if (viewMode === 'card') {
+                document.getElementById('cardViewContainer').style.display = 'block';
+                document.getElementById('tableViewContainer').style.display = 'none';
+            } else {
+                document.getElementById('cardViewContainer').style.display = 'none';
+                document.getElementById('tableViewContainer').style.display = 'block';
+            }
+            
+            displayCustomers(customers);
+        }
+
+        // 搜索客户
+        function searchCustomers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (searchTerm === '') {
+                displayCustomers(customers);
+                return;
+            }
+            
+            const filteredCustomers = customers.filter(customer => 
+                customer.name.toLowerCase().includes(searchTerm) ||
+                (customer.company && customer.company.toLowerCase().includes(searchTerm)) ||
+                customer.phone.includes(searchTerm) ||
+                (customer.email && customer.email.toLowerCase().includes(searchTerm))
+            );
+            
+            displayCustomers(filteredCustomers);
+        }
+
+        // 打开添加客户模态框
+        function openAddCustomerModal() {
+            currentCustomerId = null;
+            document.getElementById('customerModalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>添加客户';
+            document.getElementById('customerForm').reset();
+        }
+
+        // 编辑客户
+        function editCustomer(customerId) {
+            currentCustomerId = customerId;
+            const customer = customers.find(c => c.id === customerId);
+            
+            document.getElementById('customerModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>编辑客户';
+            document.getElementById('customerName').value = customer.name;
+            document.getElementById('customerPhone').value = customer.phone;
+            document.getElementById('customerEmail').value = customer.email || '';
+            document.getElementById('customerCompany').value = customer.company || '';
+            document.getElementById('customerAddress').value = customer.address || '';
+            document.getElementById('customerNotes').value = customer.notes || '';
+            
+            new bootstrap.Modal(document.getElementById('customerModal')).show();
+        }
+
+        // 保存客户
+        function saveCustomer() {
+            const form = document.getElementById('customerForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const customerData = {
+                name: document.getElementById('customerName').value,
+                phone: document.getElementById('customerPhone').value,
+                email: document.getElementById('customerEmail').value || null,
+                company: document.getElementById('customerCompany').value || null,
+                address: document.getElementById('customerAddress').value || null,
+                notes: document.getElementById('customerNotes').value || null
+            };
+
+            const url = currentCustomerId ? `/api/customers/${currentCustomerId}` : '/api/customers';
+            const method = currentCustomerId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(customerData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+                loadCustomers();
+                loadStats();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('保存客户失败', 'danger');
+            });
+        }
+
+        // 删除客户
+        function deleteCustomer(customerId) {
+            deleteCustomerId = customerId;
+            new bootstrap.Modal(document.getElementById('deleteCustomerModal')).show();
+        }
+
+        // 确认删除客户
+        function confirmDeleteCustomer() {
+            fetch(`/api/customers/${deleteCustomerId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('deleteCustomerModal')).hide();
+                loadCustomers();
+                loadStats();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('删除客户失败', 'danger');
+            });
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

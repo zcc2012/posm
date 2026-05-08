@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>价格明细 - 报价单管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/quotation.css') }}" rel="stylesheet">
+    <style>
+        .breakdown-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .breakdown-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+        }
+        .breakdown-content {
+            padding: 20px;
+        }
+        .calculation-step {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 5px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 2px;
+        }
+        .result {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+        }
+        .total-summary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .cost-item:last-child {
+            border-bottom: none;
+        }
+        .cost-label {
+            font-weight: 500;
+        }
+        .cost-value {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .material-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .process-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-calculator me-2"></i>报价单管理系统
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/quotation_new">
+                    <i class="fas fa-arrow-left me-1"></i>返回报价单
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-chart-pie me-2"></i>价格明细分析</h2>
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="fas fa-print me-1"></i>打印明细
+                    </button>
+                </div>
+
+                <!-- 基础信息 -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="material-info">
+                            <h5><i class="fas fa-cube me-2"></i>材料信息</h5>
+                            <div class="cost-item">
+                                <span class="cost-label">材料名称:</span>
+                                <span id="materialName">-</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">材料单价:</span>
+                                <span id="materialPrice">-</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">尺寸规格:</span>
+                                <span id="dimensions">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="process-info">
+                            <h5><i class="fas fa-cogs me-2"></i>工艺信息</h5>
+                            <div class="cost-item">
+                                <span class="cost-label">工艺名称:</span>
+                                <span id="processName">-</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">数量规格:</span>
+                                <span id="quantityInfo">-</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">项目套数:</span>
+                                <span id="projectSets">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 面积计算 -->
+                <div class="breakdown-card">
+                    <div class="breakdown-header">
+                        <i class="fas fa-ruler-combined me-2"></i>面积计算
+                    </div>
+                    <div class="breakdown-content">
+                        <div class="calculation-step">
+                            <strong>计算公式:</strong> 面积 = (长度 + 增加尺寸) × (宽度 + 增加尺寸) ÷ 1,000,000
+                        </div>
+                        <div class="calculation-step">
+                            <strong>具体计算:</strong> 
+                            <span class="formula" id="areaFormula">-</span>
+                        </div>
+                        <div class="calculation-step">
+                            <strong>计算结果:</strong> 
+                            <span class="result" id="areaResult">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数量计算 -->
+                <div class="breakdown-card">
+                    <div class="breakdown-header">
+                        <i class="fas fa-calculator me-2"></i>数量计算
+                    </div>
+                    <div class="breakdown-content">
+                        <div class="calculation-step">
+                            <strong>基础数量:</strong> 
+                            <span class="formula" id="baseQuantityFormula">-</span>
+                        </div>
+                        <div class="calculation-step">
+                            <strong>损耗计算:</strong> 
+                            <span class="formula" id="wastageFormula">-</span>
+                        </div>
+                        <div class="calculation-step">
+                            <strong>实际数量:</strong> 
+                            <span class="result" id="actualQuantityResult">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 工艺费用明细 -->
+                <div class="breakdown-card">
+                    <div class="breakdown-header">
+                        <i class="fas fa-industry me-2"></i>工艺费用明细
+                    </div>
+                    <div class="breakdown-content" id="processBreakdown">
+                        <!-- 动态生成工艺费用明细 -->
+                    </div>
+                </div>
+
+                <!-- 材料费用明细 -->
+                <div class="breakdown-card">
+                    <div class="breakdown-header">
+                        <i class="fas fa-box me-2"></i>材料费用明细
+                    </div>
+                    <div class="breakdown-content">
+                        <div class="calculation-step">
+                            <strong>计算公式:</strong> 材料费用 = 面积 × 材料单价
+                        </div>
+                        <div class="calculation-step">
+                            <strong>具体计算:</strong> 
+                            <span class="formula" id="materialCostFormula">-</span>
+                        </div>
+                        <div class="calculation-step">
+                            <strong>材料费用:</strong> 
+                            <span class="result" id="materialCostResult">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 总价汇总 -->
+                <div class="total-summary">
+                    <h4><i class="fas fa-coins me-2"></i>价格汇总</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="cost-item">
+                                <span class="cost-label">材料费用:</span>
+                                <span class="cost-value" id="totalMaterialCost">¥0.00</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">工艺费用:</span>
+                                <span class="cost-value" id="totalProcessCost">¥0.00</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="cost-item">
+                                <span class="cost-label">单价合计:</span>
+                                <span class="cost-value" id="unitPriceTotal">¥0.00</span>
+                            </div>
+                            <div class="cost-item" style="border-top: 2px solid white; padding-top: 15px; margin-top: 10px;">
+                                <span class="cost-label" style="font-size: 1.2em;">总价:</span>
+                                <span class="cost-value" style="font-size: 1.3em;" id="grandTotal">¥0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 页面加载时获取数据并显示
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPriceBreakdown();
+        });
+
+        function loadPriceBreakdown() {
+            console.log('🔍 开始加载价格明细数据...');
+            
+            // 从URL参数或sessionStorage获取数据
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataSource = urlParams.get('source') || 'session';
+            
+            let breakdownData;
+            if (dataSource === 'session') {
+                const sessionData = sessionStorage.getItem('priceBreakdownData');
+                console.log('📦 从sessionStorage获取的数据:', sessionData);
+                if (sessionData) {
+                    try {
+                        breakdownData = JSON.parse(sessionData);
+                        console.log('✅ 成功解析价格明细数据:', breakdownData);
+                    } catch (error) {
+                        console.error('❌ 解析价格明细数据失败:', error);
+                    }
+                }
+            }
+            
+            if (!breakdownData) {
+                console.log('⚠️ 没有找到价格明细数据，显示提示信息');
+                // 如果没有数据，显示提示信息
+                document.querySelector('.container').innerHTML = `
+                    <div class="alert alert-warning text-center mt-5">
+                        <h4><i class="fas fa-exclamation-triangle me-2"></i>暂无价格明细数据</h4>
+                        <p>请先在报价单页面进行价格计算，然后点击"查看价格明细"按钮。</p>
+                        <div class="mt-3">
+                            <a href="/quotation_new" class="btn btn-primary me-2">
+                                <i class="fas fa-arrow-left me-1"></i>返回报价单
+                            </a>
+                            <button class="btn btn-info" onclick="generateSampleData()">
+                                <i class="fas fa-eye me-1"></i>查看示例数据
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 显示数据
+            displayBreakdownData(breakdownData);
+        }
+        
+        // 生成示例数据用于演示
+        function generateSampleData() {
+            const sampleData = {
+                materialName: "157g铜版纸",
+                materialPrice: 0.012,
+                processName: "印刷+光油+模切",
+                quantity: 1000,
+                dimensions: "300mm × 200mm",
+                projectSets: 1,
+                areaCalculation: {
+                    formula: "(300+30)×(200+30)÷1000000",
+                    result: "0.0759"
+                },
+                quantityCalculation: {
+                    baseFormula: "1000件 × 1套",
+                    wastageFormula: "损耗: 40件 (100-3000件区间)",
+                    actualQuantity: 1040
+                },
+                processBreakdown: [{
+                    name: "印刷工艺（≤3000件）",
+                    basePrice: 1000,
+                    squarePrice: 0,
+                    formula: "¥1000÷1040件(含损耗) = ¥0.962/件",
+                    baseCostDetail: "基础价格均摊: ¥1000÷1040件(含损耗) = ¥0.962/件",
+                    squareCostDetail: "平方费用: 不适用（使用基础价格均摊）",
+                    unitCost: 0.962,
+                    totalCostWithWastage: "¥0.962/件 × 1040件 = ¥1000.00",
+                    cost: 0.962
+                }, {
+                    name: "光油工艺",
+                    basePrice: 150,
+                    squarePrice: 0.25,
+                    formula: "¥150÷1040件 + 0.0759m²×¥0.25×1040件 = ¥0.144 + ¥19.73",
+                    baseCostDetail: "基础价格均摊: ¥150÷1040件(含损耗) = ¥0.144/件",
+                    squareCostDetail: "平方费用: 0.0759m²×¥0.25×1040件 = ¥19.73",
+                    unitCost: 19.874,
+                    totalCostWithWastage: "¥19.874/件 × 1040件 = ¥20669.00",
+                    cost: 19.874
+                }, {
+                    name: "模切工艺",
+                    basePrice: 200,
+                    squarePrice: 0.15,
+                    formula: "¥200÷1040件 + 0.0759m²×¥0.15×1040件 = ¥0.192 + ¥11.84",
+                    baseCostDetail: "基础价格均摊: ¥200÷1040件(含损耗) = ¥0.192/件",
+                    squareCostDetail: "平方费用: 0.0759m²×¥0.15×1040件 = ¥11.84",
+                    unitCost: 12.032,
+                    totalCostWithWastage: "¥12.032/件 × 1040件 = ¥12513.00",
+                    cost: 12.032
+                }],
+                materialCost: {
+                    formula: "0.0759m² × ¥0.012",
+                    cost: 0.0009
+                },
+                summary: {
+                    materialCost: 0.0009,
+                    processCost: 32.868, // 0.962 + 19.874 + 12.032
+                    unitPrice: 32.8689, // 材料费用 + 工艺费用单价
+                    totalPrice: 34182.00, // 各工艺总费用之和
+                    wastageExplanation: "总价包含40件损耗，实际生产1040件"
+                }
+            };
+            
+            console.log('🎯 生成示例数据:', sampleData);
+            displayBreakdownData(sampleData);
+        }
+
+        function displayBreakdownData(data) {
+            // 基础信息
+            document.getElementById('materialName').textContent = data.materialName || '-';
+            document.getElementById('materialPrice').textContent = data.materialPrice ? `¥${data.materialPrice}/m²` : '-';
+            document.getElementById('dimensions').textContent = data.dimensions || '-';
+            document.getElementById('processName').textContent = data.processName || '-';
+            document.getElementById('quantityInfo').textContent = data.quantity ? `${data.quantity}件` : '-';
+            document.getElementById('projectSets').textContent = data.projectSets ? `${data.projectSets}套` : '-';
+            
+            // 面积计算
+            if (data.areaCalculation) {
+                document.getElementById('areaFormula').textContent = data.areaCalculation.formula;
+                document.getElementById('areaResult').textContent = `${data.areaCalculation.result}m²`;
+            }
+            
+            // 数量计算
+            if (data.quantityCalculation) {
+                document.getElementById('baseQuantityFormula').textContent = data.quantityCalculation.baseFormula;
+                document.getElementById('wastageFormula').textContent = data.quantityCalculation.wastageFormula;
+                document.getElementById('actualQuantityResult').textContent = `${data.quantityCalculation.actualQuantity}件`;
+            }
+            
+            // 工艺费用明细
+            if (data.processBreakdown && data.processBreakdown.length > 0) {
+                const processContainer = document.getElementById('processBreakdown');
+                processContainer.innerHTML = '';
+                
+                data.processBreakdown.forEach((process, index) => {
+                    const processDiv = document.createElement('div');
+                    processDiv.className = 'mb-4';
+                    processDiv.innerHTML = `
+                        <h6><i class="fas fa-cog me-2"></i>${process.name}</h6>
+                        <div class="calculation-step">
+                            <strong>基础价格:</strong> ¥${process.basePrice}
+                        </div>
+                        <div class="calculation-step">
+                            <strong>平方价格:</strong> ¥${process.squarePrice}/m²
+                        </div>
+                        ${process.baseCostDetail ? `
+                        <div class="calculation-step" style="background: #fff3cd; border-left-color: #ffc107;">
+                            <strong>📊 ${process.baseCostDetail}</strong>
+                        </div>` : ''}
+                        ${process.squareCostDetail ? `
+                        <div class="calculation-step" style="background: #d1ecf1; border-left-color: #17a2b8;">
+                            <strong>📐 ${process.squareCostDetail}</strong>
+                        </div>` : ''}
+                        <div class="calculation-step">
+                            <strong>单价计算公式:</strong> 
+                            <span class="formula">${process.formula}</span>
+                        </div>
+                        ${process.totalCostWithWastage ? `
+                        <div class="calculation-step" style="background: #fff3cd; border-left-color: #ffc107;">
+                            <strong>⚠️ 含损耗总价:</strong> 
+                            <span class="formula">${process.totalCostWithWastage}</span>
+                        </div>` : ''}
+                        <div class="calculation-step" style="background: #d4edda; border-left-color: #28a745;">
+                            <strong>单价合计:</strong> 
+                            <span class="result">¥${process.cost.toFixed(4)}/件</span>
+                        </div>
+                    `;
+                    processContainer.appendChild(processDiv);
+                });
+            }
+            
+            // 材料费用
+            if (data.materialCost) {
+                document.getElementById('materialCostFormula').textContent = data.materialCost.formula;
+                document.getElementById('materialCostResult').textContent = `¥${data.materialCost.cost.toFixed(4)}`;
+            }
+            
+            // 价格汇总
+            if (data.summary) {
+                document.getElementById('totalMaterialCost').textContent = `¥${data.summary.materialCost.toFixed(2)}`;
+                document.getElementById('totalProcessCost').textContent = `¥${data.summary.processCost.toFixed(2)}`;
+                document.getElementById('unitPriceTotal').textContent = `¥${data.summary.unitPrice.toFixed(2)}`;
+                document.getElementById('grandTotal').textContent = `¥${data.summary.totalPrice.toFixed(2)}`;
+            }
+        }
+    </script>
+</body>
+</html>
