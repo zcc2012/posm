@@ -796,3 +796,265 @@ label[for="laborTotalPrice"],
 .manual-cost-input:has(#laborTotalPrice) {
     display: none !important;
 }
+
+@media (max-width: 767px) {
+    body {
+        font-size: 15px;
+        padding-bottom: 92px;
+    }
+
+    .navbar .container,
+    .page-header .container,
+    .container-fluid {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .navbar-brand {
+        font-size: 0.96rem;
+        max-width: calc(100vw - 84px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .navbar-collapse {
+        padding-top: 8px;
+    }
+
+    .navbar-nav .nav-link {
+        margin: 2px 0;
+        min-height: 42px;
+        padding: 0.6rem 0.75rem !important;
+    }
+
+    .page-header {
+        margin-bottom: 0;
+        padding: 12px 0;
+    }
+
+    .page-header h1 {
+        font-size: 1.18rem;
+    }
+
+    .page-header p {
+        font-size: 0.88rem;
+    }
+
+    .container-fluid.my-4 {
+        margin-bottom: 0 !important;
+        margin-top: 12px !important;
+    }
+
+    .form-section {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        margin: 0 -12px;
+        padding: 12px;
+    }
+
+    .project-sets-section,
+    .manual-costs-section {
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 12px;
+    }
+
+    .project-sets-section .col-md-4 {
+        width: 100%;
+    }
+
+    #projectSets {
+        max-width: none !important;
+        width: 100%;
+    }
+
+    .manual-costs-grid {
+        gap: 8px;
+        grid-template-columns: 1fr;
+    }
+
+    .manual-cost-card {
+        padding: 12px;
+    }
+
+    .manual-cost-input {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    #inputContainer {
+        display: grid;
+        gap: 12px;
+    }
+
+    .label-row {
+        display: none;
+    }
+
+    .input-row {
+        align-items: start;
+        border-radius: 10px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-bottom: 0;
+        min-width: 0;
+        padding: 14px 12px;
+    }
+
+    .input-row::before {
+        align-self: center;
+        color: #475569;
+        content: "报价项 " attr(data-row);
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 800;
+        grid-column: 1 / 2;
+        letter-spacing: 0;
+    }
+
+    .field-group.material,
+    .field-group.process,
+    .field-group.standard-index {
+        grid-column: 1 / -1;
+    }
+
+    .field-group.price {
+        grid-column: auto;
+    }
+
+    .field-group.operations {
+        align-self: center;
+        display: flex;
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+    }
+
+    .field-group::before {
+        color: var(--muted);
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .field-group.material::before {
+        content: "材料";
+    }
+
+    .field-group.quantity::before {
+        content: "数量";
+    }
+
+    .field-group.dimension:nth-of-type(3)::before {
+        content: "长(mm)";
+    }
+
+    .field-group.dimension:nth-of-type(4)::before {
+        content: "宽(mm)";
+    }
+
+    .field-group.process::before {
+        content: "工艺";
+    }
+
+    .field-group.price::before {
+        content: "单价";
+    }
+
+    .field-group.standard-index::before {
+        content: "计算标准";
+    }
+
+    .field-group.operations::before {
+        display: none;
+    }
+
+    .field-group.material .d-flex {
+        flex-direction: column;
+        gap: 8px !important;
+    }
+
+    .field-group.material .form-select {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 16px;
+        height: 44px;
+        min-width: 0;
+    }
+
+    .btn {
+        min-height: 44px;
+    }
+
+    .btn-remove {
+        height: 44px;
+        width: 44px;
+    }
+
+    .standard-trigger {
+        border-radius: 8px;
+        height: 44px;
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .standard-tooltip {
+        bottom: 94px;
+        left: 12px;
+        max-height: 55vh;
+        max-width: none;
+        min-width: 0;
+        position: fixed;
+        right: 12px;
+        top: auto;
+        transform: none;
+        width: auto;
+    }
+
+    .standard-tooltip::before {
+        display: none;
+    }
+
+    .row-actions {
+        margin-top: 12px;
+    }
+
+    .row-actions .btn {
+        width: 100%;
+    }
+
+    .quote-actions {
+        background: rgba(255, 255, 255, 0.96);
+        border-top: 1px solid var(--line-soft);
+        bottom: 0;
+        box-shadow: 0 -10px 28px rgba(15, 23, 42, 0.12);
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-content: stretch;
+        margin: 14px -12px -12px;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+        position: sticky;
+        z-index: 500;
+    }
+
+    .quote-actions .btn {
+        margin: 0 !important;
+        width: 100%;
+    }
+
+    .quote-actions .btn-complete {
+        grid-column: 1 / -1;
+        order: -1;
+    }
+}

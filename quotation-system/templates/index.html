@@ -258,15 +258,111 @@
         }
 
         @media (max-width: 991px) {
-            .summary-grid,
             .main-grid,
             .module-grid {
                 grid-template-columns: 1fr;
             }
 
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
             .page-title {
                 align-items: stretch;
                 flex-direction: column;
+            }
+        }
+
+        @media (max-width: 575px) {
+            body {
+                font-size: 15px;
+            }
+
+            .navbar .container,
+            .workspace {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .navbar-brand {
+                font-size: 0.98rem;
+                max-width: calc(100vw - 84px);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .navbar-nav .nav-link {
+                margin: 2px 0;
+                min-height: 42px;
+                padding: 0.6rem 0.75rem !important;
+            }
+
+            .workspace {
+                padding-top: 14px;
+            }
+
+            .page-title {
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+
+            .page-title h1 {
+                font-size: 1.22rem;
+            }
+
+            .page-title p {
+                font-size: 0.9rem;
+            }
+
+            .page-title .btn {
+                min-height: 44px;
+                width: 100%;
+            }
+
+            .summary-grid {
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+
+            .summary-card {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+                min-height: 108px;
+                padding: 12px;
+            }
+
+            .summary-icon {
+                height: 34px;
+                width: 34px;
+            }
+
+            .summary-value {
+                font-size: 1.2rem;
+            }
+
+            .module-grid {
+                gap: 10px;
+            }
+
+            .module-card,
+            .quick-panel {
+                padding: 14px;
+            }
+
+            .module-card {
+                min-height: 0;
+            }
+
+            .module-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .module-actions .btn,
+            .quick-link {
+                min-height: 44px;
             }
         }
     </style>
