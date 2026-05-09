@@ -19,11 +19,19 @@ elif command -v python >/dev/null 2>&1 && python -c 'import sys; exit(0 if sys.v
     PYTHON_CMD="python"
 else
     echo "没有找到 Python 3。"
-    echo "请先安装 Python 3，然后重新双击本文件。"
-    echo "下载地址：https://www.python.org/downloads/macos/"
-    osascript -e 'display dialog "没有找到 Python 3，请先安装 Python 3。" buttons {"好"} default button "好"' >/dev/null 2>&1 || true
-    read -n 1 -s -r -p "按任意键退出..."
-    exit 1
+    if command -v brew >/dev/null 2>&1; then
+        echo "检测到 Homebrew，正在尝试自动安装 Python 3..."
+        brew install python
+        PYTHON_CMD="python3"
+    else
+        echo "当前 Mac 没有 Python 3，也没有 Homebrew 自动安装工具。"
+        echo "请先安装 Python 3，然后重新双击本文件。"
+        echo "下载地址：https://www.python.org/downloads/macos/"
+        open "https://www.python.org/downloads/macos/" || true
+        osascript -e 'display dialog "没有找到 Python 3，请先安装 Python 3。" buttons {"好"} default button "好"' >/dev/null 2>&1 || true
+        read -n 1 -s -r -p "按任意键退出..."
+        exit 1
+    fi
 fi
 
 if [ ! -d "$VENV_DIR" ]; then
