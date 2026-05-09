@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     region: singapore
-    rootDir: 电脑报价系统
+    rootDir: quotation-system
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     healthCheckPath: /
