@@ -96,7 +96,7 @@ echo 访问地址：%APP_URL%
 echo 关闭本窗口即可停止系统。
 echo.
 
-start "" "%APP_URL%"
+start "" /B powershell -NoProfile -ExecutionPolicy Bypass -Command "$url='%APP_URL%'; for ($i=0; $i -lt 60; $i++) { try { Invoke-WebRequest -UseBasicParsing -Uri $url -TimeoutSec 1 | Out-Null; Start-Process $url; exit 0 } catch { Start-Sleep -Seconds 1 } }; Write-Host '系统启动超时，请查看启动窗口里的错误信息。'"
 "%PYTHON_EXE%" app.py
 
 echo.

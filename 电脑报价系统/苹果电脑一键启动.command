@@ -63,8 +63,14 @@ echo "关闭此窗口即可停止系统。"
 echo ""
 
 (
-    sleep 2
-    open "$APP_URL"
+    for _ in $(seq 1 60); do
+        if curl -fsS "$APP_URL" >/dev/null 2>&1; then
+            open "$APP_URL"
+            exit 0
+        fi
+        sleep 1
+    done
+    echo "系统启动超时，请查看启动窗口里的错误信息。"
 ) &
 
 "$PYTHON_BIN" app.py
