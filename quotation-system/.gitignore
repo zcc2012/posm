@@ -1,17 +1,21 @@
 __pycache__/
+*.pyc
 *.py[cod]
 *.pyo
 
 .venv/
 venv/
 env/
+.DS_Store
 
 *.log
 *.tmp
 *.bak
 ~$*
 
-quotation_system.db
+quotation_system_backups/
+*.db-wal
+*.db-shm
 *.sqlite
 *.sqlite3
 
@@ -19,5 +23,4 @@ dist/
 build/
 *.exe
 
-.DS_Store
 Thumbs.db
