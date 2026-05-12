@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, send_from_directory
+from flask import Blueprint, render_template, redirect, send_from_directory, make_response
 
 bp = Blueprint('pages', __name__)
 
@@ -32,7 +32,13 @@ def test_standards():
 
 @bp.route('/quotation_new')
 def quotation_new():
-    return render_template('quotation_new.html')
+    html = render_template('quotation_new.html')
+    asset = '<' + 'script src="/static/js/quotation_render_patch.js?v=20260510-front-price-display"></' + 'script>'
+    if asset not in html and '</body>' in html:
+        html = html.replace('</body>', '    ' + asset + '\n</body>')
+    response = make_response(html)
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    return response
 
 @bp.route('/price_breakdown')
 def price_breakdown():
