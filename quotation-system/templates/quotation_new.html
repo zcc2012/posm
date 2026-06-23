@@ -737,17 +737,17 @@
                     } else {
                         const fallbackStandard = buildFallbackStandard(row, processName);
                         if (fallbackStandard) {
-                            finalProcessPrice = getPricingStandardProcessUnitCost(fallbackStandard, areaInSquareMeters, totalQuantity);
+                            finalProcessPrice = getPricingStandardProcessUnitCost(fallbackStandard, areaInSquareMeters, totalQuantityForMatch);
                             updateStandardsInfoPanel([fallbackStandard], row);
                         } else {
                             const processSquarePrice = parseFloat(processOption.dataset.squarePrice) || 0;
-                            finalProcessPrice = getDefaultProcessUnitCost(processPrice, processSquarePrice, areaInSquareMeters, totalQuantity);
+                            finalProcessPrice = getDefaultProcessUnitCost(processPrice, processSquarePrice, areaInSquareMeters, totalQuantityForMatch);
                             updateStandardsInfoPanel([{
                                 type: 'other_process',
                                 name: `默认${processName}计算`,
                                 base_price: processPrice,
                                 square_price: processSquarePrice,
-                                quantity_range: `总数量: ${totalQuantity}件`
+                                quantity_range: `总数量: ${totalQuantityForMatch}件`
                             }], row);
                         }
                     }
@@ -1458,6 +1458,13 @@
             return (baseCost + overflowCost) / quantity;
         }
 
+        function getDefaultProcessUnitCost(basePrice, squarePrice, area, totalQuantity) {
+            const quantity = Math.max(Number(totalQuantity) || 0, 1);
+            const sharedBaseCost = (Number(basePrice) || 0) / quantity;
+            const squareCost = (Number(area) || 0) * (Number(squarePrice) || 0);
+            return sharedBaseCost + squareCost;
+        }
+
         function getPricingStandardProcessUnitCost(standard, area, totalQuantity) {
             const quantity = Math.max(Number(totalQuantity) || 0, 1);
             const wastage = getWastageByQuantity(standard, quantity);
@@ -1571,6 +1578,42 @@
             }
 
             return { name: '标准工艺', basePrice: 0, squarePrice: 0 };
+        }
+
+        function buildFallbackStandard(row, processName = '') {
+            const ctx = getRowCalculationContext(row);
+            const rowInfo = getRowSelectionContext(row);
+            const components = getSelectedProcessComponents(rowInfo, ctx);
+
+            if (components.length > 1) {
+                return {
+                    type: 'combined',
+                    name: `${processName || rowInfo.processName || '组合工艺'}（本地默认标准）`,
+                    components,
+                    is_fallback: true,
+                    quantity_range: `总数量: ${ctx.totalQuantity}件`
+                };
+            }
+
+            if (components.length === 1) {
+                return {
+                    ...components[0],
+                    quantity_range: `总数量: ${ctx.totalQuantity}件`
+                };
+            }
+
+            if (rowInfo.processBasePrice > 0 || rowInfo.processSquarePrice > 0) {
+                return {
+                    type: 'other_process',
+                    name: `${processName || rowInfo.processName || '默认工艺'}（选项价格）`,
+                    base_price: rowInfo.processBasePrice,
+                    square_price: rowInfo.processSquarePrice,
+                    is_fallback: true,
+                    quantity_range: `总数量: ${ctx.totalQuantity}件`
+                };
+            }
+
+            return null;
         }
 
         function appendMissingProcessComponents(rowInfo, ctx, components) {
