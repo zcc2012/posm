@@ -69,11 +69,14 @@
             <div class="vision-upload card">
               <div class="vision-preview">
                 <strong>选择图纸图片</strong>
-                <span>正式小程序支持拍照或相册上传</span>
+                <span>正式小程序可直接调用手机相机</span>
               </div>
               <textarea id="visionHint" placeholder="可选：补充说明，例如“这是亚克力展示架图纸”"></textarea>
-              <div class="vision-actions">
-                <button class="ghost-button" id="mockChooseButton">上传图片</button>
+              <div class="vision-source-actions">
+                <button class="ghost-button" id="mockCameraButton">拍照</button>
+                <button class="ghost-button" id="mockChooseButton">相册</button>
+              </div>
+              <div class="vision-recognize-actions">
                 <button class="primary-button" id="mockVisionButton">开始识别</button>
               </div>
             </div>

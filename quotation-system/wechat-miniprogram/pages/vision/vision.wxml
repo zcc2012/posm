@@ -11,9 +11,9 @@
     <view wx:if="{{imagePath}}" class="image-preview" bindtap="previewImage">
       <image src="{{imagePath}}" mode="aspectFill"></image>
     </view>
-    <view wx:else class="empty-preview" bindtap="chooseImage">
+    <view wx:else class="empty-preview" bindtap="chooseImage" data-source="camera">
       <view class="empty-title">选择图纸图片</view>
-      <view class="empty-text">支持拍照或从相册选择</view>
+      <view class="empty-text">可直接拍照，也可以从相册选择</view>
     </view>
 
     <textarea
@@ -24,8 +24,11 @@
       maxlength="120"
     />
 
-    <view class="upload-actions">
-      <button class="ghost-btn" bindtap="chooseImage">{{imagePath ? '更换图片' : '上传图片'}}</button>
+    <view class="media-actions">
+      <button class="ghost-btn" bindtap="chooseImage" data-source="camera">拍照</button>
+      <button class="ghost-btn" bindtap="chooseImage" data-source="album">{{imagePath ? '更换图片' : '相册'}}</button>
+    </view>
+    <view class="recognize-actions">
       <button class="primary-btn" loading="{{recognizing}}" disabled="{{recognizing}}" bindtap="recognizeImage">开始识别</button>
     </view>
   </view>

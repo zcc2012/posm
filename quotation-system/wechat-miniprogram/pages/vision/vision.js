@@ -32,21 +32,28 @@ Page({
     this.setData({ hint: event.detail.value });
   },
 
-  chooseImage() {
+  setSelectedImage(path) {
+    this.setData({
+      imagePath: path || "",
+      result: null,
+      parts: [],
+      warnings: []
+    });
+  },
+
+  chooseImage(event) {
+    const source = event && event.currentTarget && event.currentTarget.dataset.source;
+    const sourceType = source === "camera" ? ["camera"] : source === "album" ? ["album"] : ["album", "camera"];
+
     if (wx.chooseMedia) {
       wx.chooseMedia({
         count: 1,
         mediaType: ["image"],
-        sourceType: ["album", "camera"],
+        sourceType,
         sizeType: ["compressed"],
         success: (res) => {
           const file = res.tempFiles && res.tempFiles[0];
-          this.setData({
-            imagePath: file ? file.tempFilePath : "",
-            result: null,
-            parts: [],
-            warnings: []
-          });
+          this.setSelectedImage(file ? file.tempFilePath : "");
         }
       });
       return;
@@ -54,15 +61,10 @@ Page({
 
     wx.chooseImage({
       count: 1,
-      sourceType: ["album", "camera"],
+      sourceType,
       sizeType: ["compressed"],
       success: (res) => {
-        this.setData({
-          imagePath: res.tempFilePaths[0] || "",
-          result: null,
-          parts: [],
-          warnings: []
-        });
+        this.setSelectedImage(res.tempFilePaths[0] || "");
       }
     });
   },

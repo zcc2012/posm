@@ -73,14 +73,27 @@
   line-height: 1.45;
 }
 
-.upload-actions,
+.media-actions,
+.recognize-actions,
 .result-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 18rpx;
 }
 
-.upload-actions button,
+.media-actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.recognize-actions {
+  grid-template-columns: 1fr;
+}
+
+.result-actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.media-actions button,
+.recognize-actions button,
 .result-actions button {
   margin: 0;
 }

@@ -492,6 +492,7 @@ document.querySelector("#detailButton").addEventListener("click", () => {
 });
 document.querySelector("#detailBack").addEventListener("click", () => showPage("quote"));
 document.querySelector("#choiceMask").addEventListener("click", closeChoice);
+document.querySelector("#mockCameraButton").addEventListener("click", renderVisionResult);
 document.querySelector("#mockChooseButton").addEventListener("click", renderVisionResult);
 document.querySelector("#mockVisionButton").addEventListener("click", renderVisionResult);
 document.querySelector("#applyVisionButton").addEventListener("click", applyVisionParts);

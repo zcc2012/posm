@@ -327,10 +327,18 @@ code {
   resize: none;
 }
 
-.vision-actions {
+.vision-source-actions,
+.vision-recognize-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.vision-source-actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.vision-recognize-actions {
+  grid-template-columns: 1fr;
 }
 
 .vision-result {
