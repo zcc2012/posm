@@ -5,6 +5,7 @@ from .process_routes import bp as process_bp
 from .pricing_standard_routes import bp as pricing_standard_bp
 from .quotation_routes import bp as quotation_bp
 from .graphics_routes import bp as graphics_bp
+from .vision_routes import bp as vision_bp
 
 
 def register_routes(app):
@@ -15,3 +16,4 @@ def register_routes(app):
     app.register_blueprint(pricing_standard_bp)
     app.register_blueprint(quotation_bp)
     app.register_blueprint(graphics_bp)
+    app.register_blueprint(vision_bp)

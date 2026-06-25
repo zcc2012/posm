@@ -1,0 +1,36 @@
+<view class="page detail-page">
+  <view class="quotation-doc">
+    <view class="company-name">{{quotation.company}}</view>
+    <view class="document-title">{{quotation.title}}</view>
+
+    <view class="project-info">
+      <view><text>项目套数：</text>{{quotation.projectSets}} 套</view>
+      <view><text>报价日期：</text>{{quotation.date}}</view>
+      <view><text>项目明细：</text>{{quotation.itemCount}} 个项目</view>
+    </view>
+
+    <view class="quote-table">
+      <view class="table-head">
+        <view>序号</view>
+        <view>项目</view>
+        <view>单价</view>
+        <view>总价</view>
+      </view>
+
+      <view wx:for="{{quotation.categoryRows}}" wx:key="number" class="table-row {{item.className}}">
+        <view class="number-cell">{{item.number}}</view>
+        <view class="name-cell">{{item.name}}</view>
+        <view wx:if="{{!item.isSummary}}">{{item.unitPrice}}</view>
+        <view wx:else class="summary-cell">
+          <view wx:for="{{item.unitLines}}" wx:key="*this">{{item}}</view>
+        </view>
+        <view wx:if="{{!item.isSummary}}">{{item.totalPrice}}</view>
+        <view wx:else class="summary-cell">
+          <view wx:for="{{item.totalLines}}" wx:key="*this">{{item}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <button class="ghost-btn back-btn" bindtap="goBack">返回修改</button>
+</view>

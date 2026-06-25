@@ -3,60 +3,294 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>材料库管理 - 成本分析与报价系统</title>
+    <title>材料库管理 - Mingbang POSM 报价系统</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --ink: #151515;
+            --body: #414141;
+            --muted: #747474;
+            --line: #dfdfdf;
+            --line-strong: #c9c9c9;
+            --canvas: #ffffff;
+            --soft: #f5f5f3;
+            --dark: #171b20;
+            --dark-2: #222931;
+            --blue: #1c69d4;
+            --blue-dark: #0653b6;
+            --warm: #b66f38;
+            --paper: #f3eee6;
+            --danger: #b42318;
+        }
+
+        body {
+            background: var(--soft);
+            color: var(--ink);
+            font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            font-size: 14px;
+            letter-spacing: 0;
+        }
+
+        .container {
+            max-width: 1280px;
+        }
+
         .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--dark);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
+
         .navbar-brand {
-            font-weight: bold;
-            color: white !important;
+            color: #ffffff !important;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: 0;
         }
+
+        .navbar-brand i {
+            color: #f1c66d;
+        }
+
         .navbar-nav .nav-link {
-            color: rgba(255,255,255,0.9) !important;
-            transition: color 0.3s;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.76) !important;
+            font-size: 0.92rem;
+            font-weight: 650;
+            margin-left: 2px;
+            padding: 0.45rem 0.65rem !important;
+            transition: background-color 0.18s ease, color 0.18s ease;
         }
-        .navbar-nav .nav-link:hover {
-            color: white !important;
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff !important;
         }
+
         .page-header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background:
+                linear-gradient(135deg, rgba(28, 105, 212, 0.2), rgba(182, 111, 56, 0.18)),
+                var(--dark-2);
+            border-bottom: 4px solid var(--warm);
             color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            padding: 1.8rem 0;
         }
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+
+        .page-header h1 {
+            font-size: 1.65rem;
+            font-weight: 850;
+            letter-spacing: 0;
+            margin-bottom: 0.35rem;
         }
-        .btn-action {
-            margin: 0 2px;
+
+        .page-header p {
+            color: rgba(255, 255, 255, 0.76);
         }
-        .price-display {
-            font-weight: bold;
-            color: #28a745;
-        }
-        .badge {
-            font-size: 0.8em;
-        }
-        .category-section {
+
+        .tools-row {
+            background: var(--canvas);
+            border: 1px solid var(--line);
             border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            padding: 1rem;
+        }
+
+        .table-container {
+            background: transparent;
+        }
+
+        .btn {
+            border-radius: 6px;
+            font-weight: 750;
+        }
+
+        .btn-success,
+        .btn-info,
+        .btn-primary {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #ffffff;
+        }
+
+        .btn-success:hover,
+        .btn-info:hover,
+        .btn-primary:hover,
+        .btn-success:focus,
+        .btn-info:focus,
+        .btn-primary:focus {
+            background: var(--blue-dark);
+            border-color: var(--blue-dark);
+            color: #ffffff;
+        }
+
+        .btn-outline-secondary,
+        .btn-outline-primary {
+            border-color: var(--line-strong);
+            color: var(--body);
+        }
+
+        .btn-outline-secondary:hover,
+        .btn-outline-primary:hover {
+            background: var(--dark-2);
+            border-color: var(--dark-2);
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .btn-secondary {
+            background: #4b5563;
+            border-color: #4b5563;
+        }
+
+        .btn-action {
+            height: 32px;
+            margin: 0 2px;
+            width: 32px;
+        }
+
+        .form-control,
+        .form-select {
+            border-color: var(--line);
+            border-radius: 6px;
+            color: var(--ink);
+            min-height: 40px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 0.18rem rgba(28, 105, 212, 0.16);
+        }
+
+        .price-display {
+            color: var(--blue-dark);
+            font-weight: 800;
+        }
+
+        .badge {
+            font-size: 0.78em;
+            font-weight: 800;
+        }
+
+        .badge.bg-primary {
+            background: var(--blue) !important;
+        }
+
+        .category-section {
+            background: var(--canvas);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
         .category-header {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: var(--paper) !important;
+            border-color: var(--warm) !important;
+            border-left-width: 5px !important;
         }
+
+        .category-header h5 {
+            color: var(--ink);
+            font-size: 1rem;
+            font-weight: 850;
+        }
+
+        .category-header .text-primary {
+            color: var(--warm) !important;
+        }
+
         .category-section .table {
             margin-bottom: 0;
         }
+
         .category-section:last-child {
             margin-bottom: 0 !important;
+        }
+
+        .table {
+            color: var(--ink);
+        }
+
+        .table > :not(caption) > * > * {
+            border-bottom-color: var(--line);
+            padding: 0.75rem 0.9rem;
+            vertical-align: middle;
+        }
+
+        .table-hover > tbody > tr:hover {
+            --bs-table-accent-bg: #f7f8fa;
+        }
+
+        .table-striped > tbody > tr:nth-of-type(odd) > * {
+            --bs-table-accent-bg: #fafafa;
+        }
+
+        .table-dark {
+            --bs-table-bg: var(--dark-2);
+            --bs-table-border-color: rgba(255, 255, 255, 0.1);
+            --bs-table-color: #ffffff;
+        }
+
+        .modal-content {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+        }
+
+        .modal-header.bg-primary,
+        .modal-header.bg-info {
+            background: var(--dark) !important;
+            border-bottom: 3px solid var(--blue);
+        }
+
+        .modal-header.bg-danger {
+            background: var(--dark) !important;
+            border-bottom: 3px solid var(--danger);
+        }
+
+        .modal-title {
+            font-weight: 850;
+            letter-spacing: 0;
+        }
+
+        .modal-footer {
+            background: #fafafa;
+            border-top: 1px solid var(--line);
+        }
+
+        #emptyState,
+        #emptyCategoryState {
+            background: var(--canvas);
+            border: 1px dashed var(--line-strong);
+            border-radius: 8px;
+        }
+
+        .alert {
+            border-radius: 8px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+        }
+
+        @media (max-width: 767.98px) {
+            .page-header h1 {
+                font-size: 1.35rem;
+            }
+
+            .tools-row .btn {
+                width: 100%;
+            }
+
+            .tools-row .btn + .btn {
+                margin-left: 0 !important;
+                margin-top: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -64,8 +298,8 @@
     <!-- 导航栏 -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-calculator me-2"></i>成本分析与报价系统
+            <a class="navbar-brand" href="{{ request.script_root or '' }}/">
+                <i class="fas fa-calculator me-2"></i>Mingbang POSM 报价系统
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" title="切换导航菜单">
                 <span class="navbar-toggler-icon"></span>
@@ -73,22 +307,22 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>首页</a>
+                        <a class="nav-link" href="{{ request.script_root or '' }}/"><i class="fas fa-home me-1"></i>首页</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/customers"><i class="fas fa-users me-1"></i>客户管理</a>
+                        <a class="nav-link" href="{{ request.script_root or '' }}/customers"><i class="fas fa-users me-1"></i>客户管理</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/materials"><i class="fas fa-boxes me-1"></i>材料库</a>
+                        <a class="nav-link active" href="{{ request.script_root or '' }}/materials"><i class="fas fa-boxes me-1"></i>材料库</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/processes"><i class="fas fa-cogs me-1"></i>工艺库</a>
+                        <a class="nav-link" href="{{ request.script_root or '' }}/processes"><i class="fas fa-cogs me-1"></i>工艺库</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/pricing_standards"><i class="fas fa-ruler me-1"></i>判定标准</a>
+                        <a class="nav-link" href="{{ request.script_root or '' }}/pricing_standards"><i class="fas fa-ruler me-1"></i>判定标准</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/quotation_new"><i class="fas fa-file-invoice me-1"></i>报价单</a>
+                        <a class="nav-link" href="{{ request.script_root or '' }}/quotation_new"><i class="fas fa-file-invoice me-1"></i>报价单</a>
                     </li>
                 </ul>
             </div>
@@ -106,7 +340,7 @@
     <!-- 主要内容 -->
     <div class="container my-4">
         <!-- 操作按钮 -->
-        <div class="row mb-4">
+        <div class="row mb-4 tools-row align-items-center g-3">
             <div class="col-md-4">
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#materialModal" onclick="openAddModal()">
                     <i class="fas fa-plus me-2"></i>添加材料
@@ -294,16 +528,30 @@
         let editingCategoryId = null;
         let allMaterials = [];
         let allCategories = [];
+        const scriptRoot = {{ (request.script_root or '')|tojson }};
+        const pathPrefix = scriptRoot || (window.location.pathname === '/quote' || window.location.pathname.startsWith('/quote/') ? '/quote' : '');
+
+        function appUrl(path) {
+            return `${pathPrefix}${path}`;
+        }
 
         // 页面加载时获取数据
         document.addEventListener('DOMContentLoaded', function() {
+            if (pathPrefix) {
+                document.querySelectorAll('a[href^="/"]').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && !href.startsWith(`${pathPrefix}/`) && href !== pathPrefix) {
+                        link.setAttribute('href', appUrl(href));
+                    }
+                });
+            }
             loadMaterials();
             loadCategories();
         });
 
         // 加载材料列表
         function loadMaterials() {
-            fetch('/api/materials')
+            fetch(appUrl('/api/materials'))
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -413,7 +661,7 @@
 
         // 加载分类列表
         function loadCategories() {
-            fetch('/api/material_categories')
+            fetch(appUrl('/api/material_categories'))
                 .then(response => response.json())
                 .then(data => {
                     allCategories = data;
@@ -519,7 +767,7 @@
                 return;
             }
 
-            const url = currentMaterialId ? `/api/materials/${currentMaterialId}` : '/api/materials';
+            const url = currentMaterialId ? appUrl(`/api/materials/${currentMaterialId}`) : appUrl('/api/materials');
             const method = currentMaterialId ? 'PUT' : 'POST';
 
             fetch(url, {
@@ -551,7 +799,7 @@
         // 确认删除
         function confirmDelete() {
             if (deleteMaterialId) {
-                fetch(`/api/materials/${deleteMaterialId}`, {
+                fetch(appUrl(`/api/materials/${deleteMaterialId}`), {
                     method: 'DELETE'
                 })
                 .then(response => response.json())
@@ -574,7 +822,7 @@
 
         // 在模态框中加载分类
         function loadCategoriesInModal() {
-            fetch('/api/material_categories')
+            fetch(appUrl('/api/material_categories'))
                 .then(response => response.json())
                 .then(data => {
                     allCategories = data;
@@ -646,7 +894,7 @@
                 return;
             }
 
-            fetch('/api/material_categories', {
+            fetch(appUrl('/api/material_categories'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -711,7 +959,7 @@
                 return;
             }
             
-            fetch(`/api/material_categories/${id}`, {
+            fetch(appUrl(`/api/material_categories/${id}`), {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -746,7 +994,7 @@
             const category = allCategories.find(item => item.id === id);
             const name = category ? category.name : '';
             if (confirm(`确定要删除分类 "${name}" 吗？`)) {
-                fetch(`/api/material_categories/${id}`, {
+                fetch(appUrl(`/api/material_categories/${id}`), {
                     method: 'DELETE'
                 })
                 .then(async response => {

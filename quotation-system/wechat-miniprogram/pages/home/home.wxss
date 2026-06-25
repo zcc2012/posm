@@ -1,0 +1,78 @@
+.home-page {
+  padding-bottom: 48rpx;
+}
+
+.hero {
+  padding-top: 34rpx;
+}
+
+.hero-title {
+  margin-top: 28rpx;
+  color: #ffffff;
+  font-size: 52rpx;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.hero-subtitle {
+  margin-top: 18rpx;
+  max-width: 620rpx;
+  color: #aeb8c8;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.hero-btn {
+  margin-top: 34rpx;
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  border-radius: 18rpx;
+  background: #151922;
+}
+
+.action-title {
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.action-desc {
+  margin-top: 8rpx;
+  color: #909aaa;
+  font-size: 24rpx;
+}
+
+.action-arrow {
+  color: #f4c96b;
+  font-size: 52rpx;
+  line-height: 1;
+}
+
+.notice {
+  margin-top: 28rpx;
+}
+
+.notice-title {
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.notice-text {
+  margin-top: 10rpx;
+  color: #aeb8c8;
+  font-size: 24rpx;
+  line-height: 1.6;
+}

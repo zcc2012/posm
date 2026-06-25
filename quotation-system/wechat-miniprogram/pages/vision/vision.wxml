@@ -1,0 +1,88 @@
+<view class="page vision-page">
+  <view class="vision-header">
+    <view>
+      <view class="pill">图片识别工具</view>
+      <view class="title">图纸识别</view>
+      <view class="subtitle">上传图纸或产品图片，识别部件、尺寸、数量并带入报价。</view>
+    </view>
+  </view>
+
+  <view class="upload-card card">
+    <view wx:if="{{imagePath}}" class="image-preview" bindtap="previewImage">
+      <image src="{{imagePath}}" mode="aspectFill"></image>
+    </view>
+    <view wx:else class="empty-preview" bindtap="chooseImage">
+      <view class="empty-title">选择图纸图片</view>
+      <view class="empty-text">支持拍照或从相册选择</view>
+    </view>
+
+    <textarea
+      class="hint-input"
+      value="{{hint}}"
+      bindinput="onHintInput"
+      placeholder="可选：补充说明，例如“这是亚克力展示架图纸”"
+      maxlength="120"
+    />
+
+    <view class="upload-actions">
+      <button class="ghost-btn" bindtap="chooseImage">{{imagePath ? '更换图片' : '上传图片'}}</button>
+      <button class="primary-btn" loading="{{recognizing}}" disabled="{{recognizing}}" bindtap="recognizeImage">开始识别</button>
+    </view>
+  </view>
+
+  <view wx:if="{{result}}" class="result-card card">
+    <view class="result-top">
+      <view>
+        <view class="result-label">识别类型</view>
+        <view class="result-type">{{result.image_type}}</view>
+      </view>
+      <view class="provider-badge {{result.configured ? '' : 'is-demo'}}">
+        {{result.configured ? result.provider : '演示模式'}}
+      </view>
+    </view>
+
+    <view wx:if="{{warnings.length}}" class="warning-list">
+      <view wx:for="{{warnings}}" wx:key="*this" class="warning-item">{{item}}</view>
+    </view>
+
+    <view class="parts-title">识别部件</view>
+    <block wx:for="{{parts}}" wx:key="index">
+      <view class="part-card">
+        <view class="part-head">
+          <view class="part-index">{{index + 1}}</view>
+          <input class="part-name" value="{{item.name}}" data-index="{{index}}" data-field="name" bindinput="onPartInput" />
+        </view>
+
+        <view class="part-grid">
+          <view class="field">
+            <view class="field-label">长mm</view>
+            <input type="number" value="{{item.length_mm}}" data-index="{{index}}" data-field="length_mm" bindinput="onPartInput" />
+          </view>
+          <view class="field">
+            <view class="field-label">宽mm</view>
+            <input type="number" value="{{item.width_mm}}" data-index="{{index}}" data-field="width_mm" bindinput="onPartInput" />
+          </view>
+          <view class="field">
+            <view class="field-label">数量</view>
+            <input type="number" value="{{item.quantity}}" data-index="{{index}}" data-field="quantity" bindinput="onPartInput" />
+          </view>
+        </view>
+
+        <view class="wide-field">
+          <view class="field-label">材料</view>
+          <input value="{{item.material_name}}" data-index="{{index}}" data-field="material_name" bindinput="onPartInput" placeholder="可手动修改" />
+        </view>
+        <view class="wide-field">
+          <view class="field-label">工艺</view>
+          <input value="{{item.process_name}}" data-index="{{index}}" data-field="process_name" bindinput="onPartInput" placeholder="可手动修改" />
+        </view>
+        <view wx:if="{{item.notes}}" class="part-note">{{item.notes}}</view>
+      </view>
+    </block>
+
+    <view class="result-actions">
+      <button class="ghost-btn" bindtap="clearAll">清空</button>
+      <button class="primary-btn" bindtap="applyToQuote">带入报价</button>
+    </view>
+  </view>
+</view>

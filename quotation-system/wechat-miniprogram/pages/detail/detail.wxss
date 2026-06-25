@@ -1,0 +1,126 @@
+.detail-page {
+  padding-bottom: 56rpx;
+}
+
+.quotation-doc {
+  padding: 28rpx;
+  border-radius: 18rpx;
+  color: #172033;
+  background: #ffffff;
+}
+
+.company-name {
+  color: #111827;
+  font-size: 34rpx;
+  font-weight: 900;
+  text-align: center;
+}
+
+.document-title {
+  margin-top: 10rpx;
+  color: #1f2937;
+  font-size: 42rpx;
+  font-weight: 900;
+  text-align: center;
+}
+
+.project-info {
+  display: grid;
+  gap: 8rpx;
+  margin-top: 24rpx;
+  padding: 18rpx;
+  border-radius: 14rpx;
+  color: #334155;
+  background: #f1f5f9;
+  font-size: 23rpx;
+}
+
+.project-info text {
+  font-weight: 800;
+}
+
+.quote-table {
+  margin-top: 24rpx;
+  border: 1rpx solid #d7dee8;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.table-head,
+.table-row {
+  display: grid;
+  grid-template-columns: 70rpx minmax(0, 1fr) 132rpx 132rpx;
+  align-items: stretch;
+}
+
+.table-head > view,
+.table-row > view {
+  padding: 14rpx 10rpx;
+  border-right: 1rpx solid #d7dee8;
+  border-bottom: 1rpx solid #d7dee8;
+  font-size: 21rpx;
+}
+
+.table-head > view:last-child,
+.table-row > view:last-child {
+  border-right: 0;
+}
+
+.table-head {
+  color: #ffffff;
+  background: linear-gradient(90deg, #5c78ee, #7650ad);
+  font-weight: 900;
+  text-align: center;
+}
+
+.table-row {
+  color: #263244;
+  background: #ffffff;
+}
+
+.table-row:nth-child(odd) {
+  background: #f8fafc;
+}
+
+.number-cell {
+  color: #5c78ee;
+  font-weight: 900;
+  text-align: center;
+}
+
+.name-cell {
+  font-weight: 800;
+}
+
+.item-spec {
+  margin-top: 4rpx;
+  color: #64748b;
+  font-size: 20rpx;
+  line-height: 1.35;
+}
+
+.total-row {
+  color: #111827;
+  background: #f8fafc;
+  font-weight: 900;
+}
+
+.cost-row {
+  background: #fff3df !important;
+  font-weight: 900;
+}
+
+.summary-row {
+  background: #e9f6ec !important;
+  font-weight: 900;
+}
+
+.summary-cell {
+  display: grid;
+  gap: 8rpx;
+  line-height: 1.35;
+}
+
+.back-btn {
+  margin-top: 24rpx;
+}

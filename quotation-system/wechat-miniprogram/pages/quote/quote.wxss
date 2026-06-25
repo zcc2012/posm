@@ -1,0 +1,251 @@
+.quote-page {
+  padding: 18rpx 20rpx 56rpx;
+}
+
+.quote-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.title {
+  margin-top: 12rpx;
+  color: #ffffff;
+  font-size: 42rpx;
+  font-weight: 900;
+}
+
+.status {
+  margin-top: 4rpx;
+  padding: 10rpx 16rpx;
+  border-radius: 999rpx;
+  color: #82e6a3;
+  background: rgba(130, 230, 163, 0.1);
+  font-size: 22rpx;
+}
+
+.status.loading {
+  color: #f4c96b;
+  background: rgba(244, 201, 107, 0.12);
+}
+
+.project-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18rpx;
+  margin-bottom: 16rpx;
+}
+
+.project-sets {
+  display: grid;
+  gap: 8rpx;
+  width: 190rpx;
+}
+
+.add-part-btn {
+  min-height: 64rpx;
+  margin: 0;
+  padding: 0 24rpx;
+  border: 1rpx solid rgba(244, 201, 107, 0.34);
+  border-radius: 16rpx;
+  color: #f4c96b;
+  background: rgba(244, 201, 107, 0.08);
+  font-size: 24rpx;
+  font-weight: 800;
+  line-height: 64rpx;
+}
+
+.label {
+  color: #b5bfce;
+  font-size: 19rpx;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.input,
+.pick-display {
+  min-width: 0;
+  height: 50rpx;
+  padding: 0 7rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  border-radius: 12rpx;
+  color: #ffffff;
+  background: #10141d;
+  box-sizing: border-box;
+  font-size: 18rpx;
+  line-height: 50rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.numeric-input {
+  padding: 0 2rpx;
+  font-size: 18rpx;
+  text-align: center;
+}
+
+.parts-table {
+  display: grid;
+  gap: 10rpx;
+  margin-bottom: 16rpx;
+}
+
+.parts-head,
+.part-row {
+  display: grid;
+  grid-template-columns: 32rpx 86rpx minmax(150rpx, 1fr) 50rpx 70rpx 70rpx 118rpx;
+  gap: 6rpx;
+  align-items: center;
+}
+
+.parts-head {
+  color: #9aa4b5;
+  font-size: 17rpx;
+  font-weight: 800;
+}
+
+.part-index {
+  color: #f4c96b;
+  font-size: 22rpx;
+  font-weight: 900;
+  text-align: center;
+}
+
+.text-pick {
+  font-size: 18rpx;
+}
+
+.material-pick {
+  padding: 0 8rpx;
+  font-size: 18rpx;
+}
+
+.quote-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18rpx;
+  margin-top: 18rpx;
+}
+
+.quote-actions button {
+  margin: 0;
+}
+
+.rule-card {
+  display: grid;
+  gap: 12rpx;
+  margin-top: 18rpx;
+  padding: 16rpx;
+  border: 1rpx solid rgba(244, 201, 107, 0.26);
+  border-radius: 18rpx;
+  background: rgba(244, 201, 107, 0.06);
+}
+
+.rule-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.rule-title {
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 900;
+}
+
+.rule-subtitle {
+  margin-top: 4rpx;
+  color: #9faabd;
+  font-size: 17rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.rule-price {
+  flex: 0 0 auto;
+  color: #f4c96b;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.rule-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.rule-tab {
+  min-width: 44rpx;
+  min-height: 38rpx;
+  margin: 0;
+  padding: 0 10rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.12);
+  border-radius: 12rpx;
+  color: #c6cfdd;
+  background: #111722;
+  font-size: 20rpx;
+  font-weight: 900;
+  line-height: 38rpx;
+}
+
+.rule-tab.is-active {
+  color: #17110a;
+  border-color: #f4c96b;
+  background: #f4c96b;
+}
+
+.rule-lines {
+  display: grid;
+  gap: 8rpx;
+}
+
+.rule-line {
+  padding: 10rpx 12rpx;
+  border-radius: 12rpx;
+  color: #d6deea;
+  background: rgba(16, 20, 29, 0.82);
+  font-size: 18rpx;
+  font-weight: 700;
+  line-height: 1.42;
+}
+
+.quote-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-top: 20rpx;
+  padding: 22rpx;
+  border: 1rpx solid rgba(244, 201, 107, 0.2);
+  border-radius: 18rpx;
+  background: rgba(244, 201, 107, 0.07);
+}
+
+.summary-label {
+  color: #aeb8c8;
+  font-size: 22rpx;
+}
+
+.summary-price {
+  margin-top: 4rpx;
+  color: #f4c96b;
+  font-size: 44rpx;
+  font-weight: 900;
+}
+
+.detail-btn {
+  min-width: 190rpx;
+  min-height: 76rpx;
+  margin: 0;
+  border-radius: 18rpx;
+  color: #17110a;
+  background: #f4c96b;
+  font-size: 28rpx;
+  font-weight: 900;
+  line-height: 76rpx;
+}

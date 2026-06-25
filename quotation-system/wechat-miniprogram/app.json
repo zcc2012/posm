@@ -1,0 +1,36 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/vision/vision",
+    "pages/quote/quote",
+    "pages/detail/detail"
+  ],
+  "window": {
+    "navigationBarTitleText": "明邦报价",
+    "navigationBarBackgroundColor": "#111318",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0c0e12",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#9aa3b2",
+    "selectedColor": "#f4c96b",
+    "backgroundColor": "#111318",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/vision/vision",
+        "text": "识别"
+      },
+      {
+        "pagePath": "pages/quote/quote",
+        "text": "报价"
+      }
+    ]
+  },
+  "style": "v2"
+}

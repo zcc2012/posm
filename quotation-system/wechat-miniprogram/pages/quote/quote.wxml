@@ -1,0 +1,91 @@
+<view class="page quote-page">
+  <view class="quote-header">
+    <view>
+      <view class="pill">手机端报价</view>
+      <view class="title">新建报价</view>
+    </view>
+    <view class="status {{loading ? 'loading' : ''}}">{{loading ? '加载中' : '在线'}}</view>
+  </view>
+
+  <view class="project-toolbar">
+    <view class="project-sets">
+      <view class="label">项目套数</view>
+      <input class="input numeric-input" type="number" value="{{projectSets}}" bindinput="onProjectSetsInput" />
+    </view>
+    <button class="add-part-btn" bindtap="addPart">+ 新部件</button>
+  </view>
+
+  <view class="parts-table">
+    <view class="parts-head">
+      <view>件</view>
+      <view>分类</view>
+      <view>材料</view>
+      <view>数量</view>
+      <view>长</view>
+      <view>宽</view>
+      <view>工艺</view>
+    </view>
+
+    <block wx:for="{{parts}}" wx:key="id">
+      <view
+        class="part-row"
+        data-index="{{index}}"
+        bindtouchstart="onPartTouchStart"
+        bindtouchend="onPartTouchEnd"
+        bindtouchcancel="onPartTouchCancel"
+      >
+        <view class="part-index">{{index + 1}}</view>
+        <picker mode="selector" range="{{categoryNames}}" value="{{item.categoryIndex}}" data-index="{{index}}" bindchange="onPartCategoryChange">
+          <view class="pick-display text-pick">{{item.categoryText ? item.categoryText : '分类'}}</view>
+        </picker>
+        <picker mode="selector" range="{{item.materialNames}}" value="{{item.materialIndex}}" data-index="{{index}}" bindchange="onPartMaterialChange">
+          <view class="pick-display material-pick">{{item.materialText ? item.materialText : '请选择材料'}}</view>
+        </picker>
+        <input class="input numeric-input" type="number" value="{{item.quantity}}" data-index="{{index}}" data-field="quantity" bindinput="onPartInput" />
+        <input class="input numeric-input" type="number" value="{{item.length}}" data-index="{{index}}" data-field="length" bindinput="onPartInput" />
+        <input class="input numeric-input" type="number" value="{{item.width}}" data-index="{{index}}" data-field="width" bindinput="onPartInput" />
+        <picker mode="selector" range="{{processNames}}" value="{{item.processIndex}}" data-index="{{index}}" bindchange="onPartProcessChange">
+          <view class="pick-display text-pick">{{item.processText ? item.processText : '工艺'}}</view>
+        </picker>
+      </view>
+    </block>
+  </view>
+
+  <view class="quote-actions">
+    <button class="ghost-btn" bindtap="resetForm">清空</button>
+    <button class="primary-btn" bindtap="calculateNow">计算</button>
+  </view>
+
+  <view wx:if="{{showRuleSelector}}" class="rule-card">
+    <view class="rule-head">
+      <view>
+        <view class="rule-title">计算规则</view>
+        <view wx:if="{{activeRuleItem}}" class="rule-subtitle">部件 {{activeRuleItem.index}} · {{activeRuleItem.name}}</view>
+        <view wx:else class="rule-subtitle">选择部件编号查看单价来源</view>
+      </view>
+      <view wx:if="{{activeRuleItem}}" class="rule-price">¥{{activeRuleItem.unitPrice}}</view>
+    </view>
+
+    <view class="rule-tabs">
+      <button
+        wx:for="{{detailItems}}"
+        wx:key="index"
+        class="rule-tab {{activeRuleIndex == index ? 'is-active' : ''}}"
+        data-index="{{index}}"
+        bindtap="setActiveRule"
+      >{{index + 1}}</button>
+    </view>
+
+    <view wx:if="{{activeRuleItem}}" class="rule-lines">
+      <view wx:for="{{activeRuleItem.ruleLines}}" wx:key="*this" class="rule-line">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="quote-summary">
+    <view>
+      <view class="summary-label">报价合计</view>
+      <view class="summary-price">¥{{grandTotal}}</view>
+    </view>
+    <button class="detail-btn" bindtap="openDetail">生成报价单</button>
+  </view>
+</view>

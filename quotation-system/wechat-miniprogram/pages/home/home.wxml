@@ -1,0 +1,31 @@
+<view class="page home-page">
+  <view class="hero card">
+    <view class="pill">微信小程序 Demo</view>
+    <view class="hero-title">明邦报价系统</view>
+    <view class="hero-subtitle">手机版报价入口，复用现有 Flask 数据与报价接口。</view>
+    <button class="primary-btn hero-btn" bindtap="goQuote">开始报价</button>
+  </view>
+
+  <view class="section-title">快速入口</view>
+  <view class="action-list">
+    <view class="action-card" bindtap="goVision">
+      <view>
+        <view class="action-title">图纸图片识别</view>
+        <view class="action-desc">上传图片，自动提取部件、尺寸、数量</view>
+      </view>
+      <view class="action-arrow">›</view>
+    </view>
+    <view class="action-card" bindtap="goQuote">
+      <view>
+        <view class="action-title">新建手机报价</view>
+        <view class="action-desc">从电脑后台资料中选择项目并计算价格</view>
+      </view>
+      <view class="action-arrow">›</view>
+    </view>
+  </view>
+
+  <view class="notice card">
+    <view class="notice-title">当前版本</view>
+    <view class="notice-text">小程序只做手机报价；材料、工艺和分类维护继续放在电脑网页版后台。</view>
+  </view>
+</view>
